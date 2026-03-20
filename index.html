@@ -242,11 +242,11 @@ footer{border-top:1px solid var(--navy-border);padding:18px 0;margin-top:8px;dis
 
 <!-- CONTEXT MENU -->
 <div id="ctx" class="ctx">
-  <div class="ctx-item" onclick="ctxDo('en-progreso')">🔵 En progreso</div>
-  <div class="ctx-item" onclick="ctxDo('pendiente')">🟡 Pendiente</div>
-  <div class="ctx-item" onclick="ctxDo('demorada')">🔴 Demorada</div>
-  <div class="ctx-item" onclick="ctxDo('completada')">✅ Mover a Completadas</div>
-  <div class="ctx-item danger" onclick="ctxDo('del')">🗑 Eliminar</div>
+  <div class="ctx-item" onmousedown="ctxDo('en-progreso')">🔵 En progreso</div>
+  <div class="ctx-item" onmousedown="ctxDo('pendiente')">🟡 Pendiente</div>
+  <div class="ctx-item" onmousedown="ctxDo('demorada')">🔴 Demorada</div>
+  <div class="ctx-item" onmousedown="ctxDo('completada')">✅ Mover a Completadas</div>
+  <div class="ctx-item danger" onmousedown="ctxDo('del')">🗑 Eliminar</div>
 </div>
 
 <!-- MODAL -->
@@ -799,7 +799,9 @@ function showCtx(e, id){
 function hideCtx(){ document.getElementById('ctx').style.display='none'; ctxId=null; }
 
 function ctxDo(action){
+  const savedId=ctxId;
   hideCtx();
+  ctxId=savedId;
   if(!ctxId) return;
   const i=acciones.findIndex(a=>a.id===ctxId);
   if(i===-1) return;
@@ -815,7 +817,7 @@ function ctxDo(action){
   renderAcc();
 }
 
-document.addEventListener('click',function(e){
+document.addEventListener('mousedown',function(e){
   const m=document.getElementById('ctx');
   if(m.style.display==='block'&&!m.contains(e.target)) hideCtx();
 });
