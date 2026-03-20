@@ -230,6 +230,25 @@ tbody td{padding:10px 13px;color:var(--white-dim);white-space:nowrap;}
 .dc-t.y{color:var(--yellow);}
 .dr{font-size:12px;color:var(--white-dim);display:flex;gap:7px;margin-bottom:6px;}
 
+/* INSIGHTS */
+.ins-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:28px;}
+.ins-card{background:var(--navy-card);border:1px solid var(--navy-border);border-radius:12px;overflow:hidden;position:relative;}
+.ins-card:hover{border-color:var(--cyan);}
+.ins-img{width:100%;max-height:200px;object-fit:contain;background:var(--navy-mid);display:block;padding:8px;}
+.ins-body{padding:14px;}
+.ins-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--cyan);margin-bottom:6px;}
+.ins-txt{font-size:12px;color:var(--white-dim);line-height:1.6;}
+.ins-meta{font-size:10px;color:var(--white-muted);font-family:'DM Mono',monospace;margin-top:8px;}
+.ins-del{position:absolute;top:8px;right:8px;background:var(--red-dim);border:1px solid var(--red);border-radius:5px;color:var(--red);font-size:10px;padding:2px 7px;cursor:pointer;transition:opacity .2s;}
+.ins-del:hover{opacity:.8;}
+.ins-upload{background:var(--navy-card);border:2px dashed var(--navy-border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;}
+.ins-upload:hover{border-color:var(--cyan);background:var(--cyan-dim);}
+.ins-upload-icon{font-size:28px;margin-bottom:8px;}
+.ins-upload-txt{font-size:12px;color:var(--white-muted);}
+.ins-upload-sub{font-size:11px;color:var(--white-muted);margin-top:4px;font-family:'DM Mono',monospace;}
+.ins-form{background:var(--navy-card);border:1px solid var(--navy-border);border-radius:12px;padding:18px;margin-bottom:14px;display:none;}
+.ins-form.open{display:block;}
+.ins-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:12px;background:var(--navy-mid);}
 footer{border-top:1px solid var(--navy-border);padding:18px 0;margin-top:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .fl3{font-size:11px;color:var(--white-muted);font-family:'DM Mono',monospace;letter-spacing:1px;}
 .fr2{font-size:11px;color:var(--white-muted);}
@@ -415,6 +434,38 @@ footer{border-top:1px solid var(--navy-border);padding:18px 0;margin-top:8px;dis
     <div class="dc"><div class="dc-t g">✓ Lo que está funcionando</div><div id="dGood"><div class="sp"></div></div></div>
     <div class="dc"><div class="dc-t y">⚠ Puntos a resolver</div><div id="dWarn"><div class="sp"></div></div></div>
   </div>
+
+  <div class="sh"><span class="sn">10</span><span class="st">ANÁLISIS E INSIGHTS</span><div class="sl"></div></div>
+  <div style="font-size:11px;color:var(--white-muted);font-family:'DM Mono',monospace;margin-bottom:14px">Adjuntá capturas, gráficos y análisis estratégicos. Se guardan automáticamente.</div>
+
+  <!-- Upload area -->
+  <div class="ins-upload" onclick="document.getElementById('insFileInput').click()">
+    <div class="ins-upload-icon">📎</div>
+    <div class="ins-upload-txt">Hacer click para subir imagen o captura</div>
+    <div class="ins-upload-sub">PNG, JPG, GIF · Máx 5MB</div>
+  </div>
+  <input type="file" id="insFileInput" accept="image/*" style="display:none" onchange="insLoadFile(this)">
+
+  <!-- Form to add insight -->
+  <div class="ins-form" id="insForm">
+    <img id="insPreview" class="ins-preview" src="" alt="preview">
+    <div class="fg" style="margin-bottom:10px">
+      <label class="fl2">Título del insight</label>
+      <input type="text" class="fi" id="insTitle" placeholder="Ej: Análisis de audiencia — Mar 2026">
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label class="fl2">Análisis y observaciones</label>
+      <textarea class="ntx" id="insAnalysis" rows="4" placeholder="Describí qué muestra esta imagen y qué conclusiones sacás..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="bp" onclick="insSave()" style="font-size:13px">GUARDAR INSIGHT</button>
+      <button class="bx" onclick="insCancel()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Grid de insights guardados -->
+  <div class="ins-grid" id="insGrid"></div>
+
 </div>
 
 <!-- ═══ NOTAS ═══ -->
@@ -861,12 +912,100 @@ try{
   if(c)document.getElementById('n3').value=c;
 }catch(e){}
 
+// ══ INSIGHTS ══════════════════════════════════════════
+let insights = [];
+let insPendingFile = null;
+
+function insLoadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('El archivo supera los 5MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    insPendingFile = { data: e.target.result, name: file.name, type: file.type };
+    document.getElementById('insPreview').src = e.target.result;
+    document.getElementById('insForm').classList.add('open');
+    document.getElementById('insTitle').focus();
+    input.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function insSave() {
+  if (!insPendingFile) return;
+  const title    = document.getElementById('insTitle').value.trim() || 'Insight sin título';
+  const analysis = document.getElementById('insAnalysis').value.trim();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-AR', {day:'2-digit',month:'short',year:'numeric'}) + ' · ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  insights.unshift({ id: uid(), img: insPendingFile.data, title, analysis, date: dateStr });
+  saveIns();
+  renderIns();
+  insCancel();
+}
+
+function insCancel() {
+  insPendingFile = null;
+  document.getElementById('insForm').classList.remove('open');
+  document.getElementById('insTitle').value = '';
+  document.getElementById('insAnalysis').value = '';
+  document.getElementById('insPreview').src = '';
+}
+
+function insDelete(id) {
+  if (!confirm('¿Eliminar este insight?')) return;
+  insights = insights.filter(i => i.id !== id);
+  saveIns();
+  renderIns();
+}
+
+function saveIns() {
+  try {
+    // Guardamos sin las imágenes en base64 pesadas si hay muchos
+    localStorage.setItem('dn_ins', JSON.stringify(insights));
+  } catch(e) {
+    // Si localStorage está lleno, intentamos sin imágenes antiguas
+    try {
+      const light = insights.map(i => ({...i, img: i.img ? i.img.substring(0,100)+'...' : ''}));
+      console.warn('localStorage lleno, guardando versión reducida');
+    } catch(e2) {}
+  }
+}
+
+function loadIns() {
+  try {
+    const s = localStorage.getItem('dn_ins');
+    if (s) insights = JSON.parse(s);
+  } catch(e) { insights = []; }
+}
+
+function renderIns() {
+  const grid = document.getElementById('insGrid');
+  if (!insights.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--white-muted);font-size:12px;font-family:DM Mono,monospace">No hay insights guardados todavía. Subí una imagen para empezar.</div>';
+    return;
+  }
+  grid.innerHTML = insights.map(ins => `
+    <div class="ins-card">
+      <button class="ins-del" onmousedown="insDelete('${ins.id}')">✕ Eliminar</button>
+      ${ins.img ? `<img class="ins-img" src="${ins.img}" alt="${ins.title}">` : ''}
+      <div class="ins-body">
+        <div class="ins-title">${ins.title}</div>
+        ${ins.analysis ? `<div class="ins-txt">${ins.analysis.replace(/
+/g,'<br>')}</div>` : ''}
+        <div class="ins-meta">${ins.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 // ══ INIT ═════════════════════════════════════════════
 const MN=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const now=new Date();
 document.getElementById('curDate').textContent=MN[now.getMonth()]+' '+now.getFullYear();
 loadAcc();
 renderAcc();
+loadIns();
+renderIns();
 loadData();
 </script>
 </body>
