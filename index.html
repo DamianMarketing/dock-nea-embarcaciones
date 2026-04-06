@@ -286,7 +286,8 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <span class="mlbl">Período:</span>
     <div class="mb" id="mb0" onclick="selMes(0)">ENE 2026</div>
     <div class="mb" id="mb1" onclick="selMes(1)">FEB 2026</div>
-    <div class="mb cur A" id="mb2" onclick="selMes(2)">MAR 2026 ●</div>
+    <div class="mb" id="mb2" onclick="selMes(2)">MAR 2026</div>
+    <div class="mb cur A" id="mb3" onclick="selMes(3)">ABR 2026 ●</div>
     <span style="margin-left:auto;font-size:10px;color:var(--wm);font-family:'DM Mono',monospace">● mes actual</span>
   </div>
 </header>
@@ -313,7 +314,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div><div style="margin-top:9px;font-size:11px;color:var(--wm);font-family:'DM Mono',monospace;letter-spacing:2px">CARGANDO...</div></div>
   </div>
   <div id="semSec">
-    <div class="sh"><span class="sn">02</span><span class="st2">SEGUIMIENTO MENSUAL — MARZO 2026</span><div class="sl"></div></div>
+    <div class="sh"><span class="sn">02</span><span class="st2">SEGUIMIENTO MENSUAL — ABRIL 2026</span><div class="sl"></div></div>
     <div class="tw">
       <div class="th"><span class="tt">RESUMEN SEMANAL</span><span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● DATOS EN VIVO</span></div>
       <div style="overflow-x:auto"><table>
@@ -421,13 +422,15 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 </div>
 
 <script>
-var URL_SEM = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=475339073&single=true&output=csv";
+var URL_SEM_MAR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=475339073&single=true&output=csv";
+var URL_SEM_ABR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1403881619&single=true&output=csv";
 var URL_HIS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1500152970&single=true&output=csv";
+var URL_SEM = URL_SEM_ABR; // mes actual
 
 var semData = [];
 var histData = [];
 var curWk = 0;
-var curMes = 2;
+var curMes = 3;
 
 function parseCsv(text) {
   var rows = [];
@@ -754,17 +757,35 @@ function renderDiag() {
 
 function selMes(idx) {
   curMes = idx;
-  var btns = ['mb0','mb1','mb2'];
+  var btns = ['mb0','mb1','mb2','mb3'];
   for (var i = 0; i < btns.length; i++) {
     var el = document.getElementById(btns[i]);
-    el.className = 'mb' + (i === 2 ? ' cur' : '') + (i === idx ? ' A' : '');
+    if (!el) continue;
+    el.className = 'mb' + (i === 3 ? ' cur' : '') + (i === idx ? ' A' : '');
   }
-  var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026'];
-  document.getElementById('metTitle').textContent = 'MÉTRICAS CLAVE — ' + names[idx];
-  document.getElementById('wkSel').style.display = idx === 2 ? 'block' : 'none';
-  document.getElementById('semSec').style.display = idx === 2 ? 'block' : 'none';
-  if (idx === 2) { renderKPIs(); renderFunnel(); }
-  else { renderKPIsHist(); renderFunnelHist(); }
+  var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
+  document.getElementById('metTitle').textContent = 'METRICAS CLAVE — ' + (names[idx] || '');
+  var esMesActual = idx === 3;
+  document.getElementById('wkSel').style.display = esMesActual ? 'block' : 'none';
+  document.getElementById('semSec').style.display = esMesActual ? 'block' : 'none';
+  if (esMesActual) {
+    // Cargar datos de abril si no están
+    if (semData.length === 0 || curMes !== idx) {
+      URL_SEM = URL_SEM_ABR;
+      loadData();
+    } else {
+      renderKPIs();
+      renderFunnel();
+    }
+  } else if (idx === 2) {
+    // Cargar datos de marzo
+    URL_SEM = URL_SEM_MAR;
+    semData = [];
+    loadData();
+  } else {
+    renderKPIsHist();
+    renderFunnelHist();
+  }
 }
 
 function selWk(idx) {
