@@ -580,116 +580,33 @@ function renderKPIs() {
 function renderKPIsHist() {
   var d = hRow(curMes);
   if (!d.length) {
-    document.getElementById('kpiGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm)">Sin datos históricos</div>';
+    document.getElementById('kpiGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm)">Sin datos hist\u00f3ricos</div>';
     return;
   }
-  var inv = toNum(d[3]);
-  var leads = toNum(d[9]);
-  var cal = toNum(d[13]);
-  var bad = toNum(d[14]);
-  var ven = toNum(d[15]);
-  var cpl = toNum(d[8]);
-  var ctr = toNum(d[9]);
-  var sc = toNum(d[14]);
+  var inv     = toNum(d[3]);
+  var leads   = toNum(d[7]);
+  var cal     = toNum(d[11]);
+  var bad     = toNum(d[12]);
+  var ven     = toNum(d[13]);
+  var cpl     = toNum(d[8]);
+  var ctr     = toNum(d[9]);
+  var sc      = toNum(d[14]);
+  var ingreso = toNum(d[16]);
+  var roas    = toNum(d[17]);
   var scv = sc > 0 ? Math.round(sc) : (leads > 0 ? Math.round(cal/leads*100) : 0);
-  document.getElementById('hScore').textContent = (scv > 0 ? scv : '—') + '% SCORE';
+  document.getElementById('hScore').textContent = (scv > 0 ? scv : '\u2014') + '% SCORE';
+  var roasVal = roas > 0 ? roas.toFixed(1) + 'x' : (ingreso > 0 && inv > 0 ? (ingreso/inv).toFixed(1) + 'x' : '\u2014');
   var html = '';
-  html += '<div class="kc"><div class="kl">Inversión Total</div><div class="kv C">' + ars(inv) + '</div><div class="ks">Mes completo</div><span class="dl N">Histórico</span></div>';
+  html += '<div class="kc"><div class="kl">Inversi\u00f3n Total</div><div class="kv C">' + ars(inv) + '</div><div class="ks">Mes completo</div><span class="dl N">Hist\u00f3rico</span></div>';
   html += '<div class="kc"><div class="kl">Leads Totales</div><div class="kv">' + leads + '</div><div class="ks">CTR: ' + pct(ctr) + '</div><span class="dl U">Mes completo</span></div>';
-  html += '<div class="kc"><div class="kl">Leads Calificados</div><div class="kv G">' + (cal > 0 ? cal : '—') + '</div><div class="ks">De ' + leads + ' totales</div><span class="dl U">' + (leads > 0 && cal > 0 ? Math.round(cal/leads*100) + '% calid.' : '—') + '</span></div>';
-  html += '<div class="kc"><div class="kl">Bad Leads</div><div class="kv R">' + (bad > 0 ? bad : '—') + '</div><div class="ks">' + (leads > 0 && bad > 0 ? Math.round(bad/leads*100) + '% total' : '—') + '</div><span class="dl N">Mes completo</span></div>';
-  html += '<div class="kc"><div class="kl">Ventas Cerradas</div><div class="kv ' + (ven > 0 ? 'G' : 'Y') + '">' + (ven > 0 ? ven : '—') + '</div><div class="ks">' + (leads > 0 && ven > 0 ? pct(ven/leads*100) + ' tasa' : '—') + '</div><span class="dl ' + (ven > 0 ? 'U' : 'N') + '">' + (ven > 0 ? 'Confirmadas' : 'Sin datos') + '</span></div>';
-  html += '<div class="kc"><div class="kl">CPL Real</div><div class="kv Y">' + (cpl > 0 ? ars(cpl) : '—') + '</div><div class="ks">Costo por lead</div><span class="dl U">Mes completo</span></div>';
-  html += '<div class="kc"><div class="kl">Scoring Calidad</div><div class="kv C">' + (scv > 0 ? scv + '%' : '—') + '</div><div class="ks">Calidad de entrada</div><span class="dl ' + (scv >= 80 ? 'U' : 'N') + '">' + (scv >= 80 ? 'Bueno' : '—') + '</span></div>';
-  html += '<div class="kc"><div class="kl">CAC</div><div class="kv">' + (ven > 0 && inv > 0 ? ars(inv/ven) : '—') + '</div><div class="ks">Costo adquis. cliente</div><span class="dl N">' + (ven > 0 ? 'Calculado' : 'Sin ventas') + '</span></div>';
+  html += '<div class="kc"><div class="kl">Leads Calificados</div><div class="kv G">' + (cal > 0 ? cal : '\u2014') + '</div><div class="ks">De ' + leads + ' totales</div><span class="dl U">' + (leads > 0 && cal > 0 ? Math.round(cal/leads*100) + '% calid.' : '\u2014') + '</span></div>';
+  html += '<div class="kc"><div class="kl">Bad Leads</div><div class="kv R">' + (bad > 0 ? bad : '\u2014') + '</div><div class="ks">' + (leads > 0 && bad > 0 ? Math.round(bad/leads*100) + '% total' : '\u2014') + '</div><span class="dl N">Mes completo</span></div>';
+  html += '<div class="kc"><div class="kl">Ventas Cerradas</div><div class="kv ' + (ven > 0 ? 'G' : 'Y') + '">' + (ven > 0 ? ven : '\u2014') + '</div><div class="ks">' + (leads > 0 && ven > 0 ? pct(ven/leads*100) + ' tasa' : '\u2014') + '</div><span class="dl ' + (ven > 0 ? 'U' : 'N') + '">' + (ven > 0 ? 'Confirmadas' : 'Sin datos') + '</span></div>';
+  html += '<div class="kc"><div class="kl">CPL Real</div><div class="kv Y">' + (cpl > 0 ? ars(cpl) : '\u2014') + '</div><div class="ks">Costo por lead</div><span class="dl U">Mes completo</span></div>';
+  html += '<div class="kc"><div class="kl">Ingreso Generado</div><div class="kv G">' + (ingreso > 0 ? ars(ingreso) : '\u2014') + '</div><div class="ks">Ventas atribuidas</div><span class="dl ' + (ingreso > 0 ? 'U' : 'N') + '">' + (ingreso > 0 ? 'Registrado' : 'Sin datos') + '</span></div>';
+  html += '<div class="kc"><div class="kl">ROAS</div><div class="kv ' + (roasVal !== '\u2014' ? 'G' : '') + '">' + roasVal + '</div><div class="ks">Retorno sobre inversi\u00f3n</div><span class="dl ' + (roasVal !== '\u2014' ? 'U' : 'N') + '">' + (roasVal !== '\u2014' ? 'Calculado' : 'Sin ingreso') + '</span></div>';
   document.getElementById('kpiGrid').innerHTML = html;
 }
-
-function renderTable() {
-  var names = ['01 al 07 Mar','08 al 14 Mar','15 al 21 Mar','22 al 31 Mar'];
-  var ideals = [114000,228000,342000,456000];
-  var html = '';
-  for (var i = 0; i < 4; i++) {
-    var d = wRow(i);
-    var has = d.length > 0 && toNum(d[3]) > 0;
-    var inv = has ? toNum(d[3]) : 0;
-    var invI = toNum(d[2]) || ideals[i];
-    var banc = has ? toNum(d[4]) : 0;
-    var prep = has ? toNum(d[5]) : 0;
-    var leads = has ? toNum(d[9]) : 0;
-    var cal = has ? toNum(d[13]) : 0;
-    var bad = has ? toNum(d[14]) : 0;
-    var ven = has ? toNum(d[15]) : 0;
-    var cpl = has ? toNum(d[10]) : 0;
-    var sc = has ? toNum(d[16]) : 0;
-    var scv = sc > 0 ? Math.round(sc) : (leads > 0 ? Math.round(cal/leads*100) : 0);
-    var est = !has ? '<span class="tag mt">Pendiente</span>' : (ven > 0 ? '<span class="tag ok">Con ventas</span>' : '<span class="tag ok">Activo</span>');
-    html += '<tr>';
-    html += '<td class="wl">Sem ' + (i+1) + '</td>';
-    html += '<td style="color:var(--wm)">' + ars(invI) + '</td>';
-    html += '<td style="color:' + (has && inv > invI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(inv) : '—') + '</td>';
-    var taxCell = has && banc > 0 ? '<div style="font-size:11px;color:var(--y)" title="Bancarizada: +30% Gan. +4.5% IIBB +1.2% Sellos">' + ars(banc) + ' <span style=\'font-size:9px;opacity:.6\'>BANC</span></div><div style="font-size:11px;color:var(--c);margin-top:2px" title="Prepaga (Lemon/Ualá): +21% IVA +4.5% IIBB">' + ars(prep) + ' <span style=\'font-size:9px;opacity:.6\'>PREP</span></div>' : '—';
-    html += '<td>' + taxCell + '</td>';
-    html += '<td style="color:' + (leads > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? leads : '—') + '</td>';
-    html += '<td>' + (has ? cal : '—') + '</td>';
-    html += '<td>' + (has ? bad : '—') + '</td>';
-    html += '<td style="color:' + (ven > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? ven : '—') + '</td>';
-    html += '<td style="color:' + (cpl > 0 && cpl < 5000 ? 'var(--g)' : 'var(--y)') + '">' + (has && cpl > 0 ? ars(cpl) : '—') + '</td>';
-    html += '<td>' + (scv > 0 ? scv + '%' : '—') + '</td>';
-    html += '<td>' + est + '</td>';
-    html += '</tr>';
-  }
-  var tot = semData[4] || [];
-  if (tot.length && toNum(tot[3]) > 0) {
-    var tBanc = toNum(tot[4]);
-    var tPrep = toNum(tot[5]);
-    var tTaxCell = tBanc > 0 ? '<div style="font-size:11px;color:var(--y)" title="Bancarizada: +30% Gan. +4.5% IIBB +1.2% Sellos">' + ars(tBanc) + ' <span style=\'font-size:9px;opacity:.6\'>BANC</span></div><div style="font-size:11px;color:var(--c);margin-top:2px" title="Prepaga (Lemon/Ualá): +21% IVA +4.5% IIBB">' + ars(tPrep) + ' <span style=\'font-size:9px;opacity:.6\'>PREP</span></div>' : '—';
-    html += '<tr style="background:rgba(0,194,224,0.06)">';
-    html += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
-    html += '<td style="color:var(--c)">' + ars(toNum(tot[3])) + '</td>';
-    html += '<td>' + tTaxCell + '</td>';
-    html += '<td style="color:var(--g)">' + toNum(tot[9]) + '</td>';
-    html += '<td>' + toNum(tot[13]) + '</td>';
-    html += '<td>' + toNum(tot[14]) + '</td>';
-    html += '<td style="color:' + (toNum(tot[15]) > 0 ? 'var(--g)' : 'var(--wm)') + '">' + toNum(tot[15]) + '</td>';
-    html += '<td style="color:var(--g)">' + (toNum(tot[10]) > 0 ? ars(toNum(tot[10])) : '—') + '</td>';
-    html += '<td>—</td>';
-    html += '<td><span class="tag ok">En curso</span></td>';
-    html += '</tr>';
-  }
-  document.getElementById('tBody').innerHTML = html;
-}
-
-function renderFunnel() {
-  var d = wRow(curWk);
-  if (!d.length) {
-    document.getElementById('fSteps').innerHTML = '<div style="color:var(--wm);font-size:12px">Sin datos</div>';
-    return;
-  }
-  var leads = toNum(d[9]);
-  var cal = toNum(d[13]);
-  var bad = toNum(d[14]);
-  var ven = toNum(d[15]);
-  var pC = leads > 0 ? Math.round(cal/leads*100) : 0;
-  var pB = leads > 0 ? Math.round(bad/leads*100) : 0;
-  var pV = leads > 0 ? (ven/leads*100).toFixed(1) : 0;
-  var cpl = toNum(d[8]);
-  document.getElementById('fTitle').textContent = 'SEMANA ' + (curWk+1);
-  var html = '';
-  html += '<div class="fs"><div class="flab">Leads Totales</div><div class="fbw"><div class="fb" style="width:100%"></div></div><div class="fv">' + leads + '</div><div class="fp">100%</div></div>';
-  html += '<div class="fs"><div class="flab">Calificados</div><div class="fbw"><div class="fb" style="width:' + pC + '%;background:var(--g)"></div></div><div class="fv">' + cal + '</div><div class="fp">' + pC + '%</div></div>';
-  html += '<div class="fs"><div class="flab">Bad Leads</div><div class="fbw"><div class="fb" style="width:' + pB + '%;background:var(--r)"></div></div><div class="fv">' + bad + '</div><div class="fp">' + pB + '%</div></div>';
-  html += '<div class="fs"><div class="flab">Ventas</div><div class="fbw"><div class="fb" style="width:' + Math.min(pV,100) + '%;background:var(--y)"></div></div><div class="fv" style="color:' + (ven > 0 ? 'var(--g)' : 'var(--wm)') + '">' + ven + '</div><div class="fp">' + pV + '%</div></div>';
-  document.getElementById('fSteps').innerHTML = html;
-  var ahtml = '';
-  ahtml += '<div style="display:flex;flex-direction:column;gap:9px">';
-  ahtml += '<div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">✓ Positivo</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '—') + ' · ' + cal + ' calificados (' + pC + '%)</div></div>';
-  ahtml += '<div style="padding:11px;background:var(--yd);border-radius:8px;border-left:3px solid var(--y)"><div style="font-size:11px;color:var(--y);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">⚠ Atención</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (ven === 0 ? 'Sin ventas — activar seguimiento comercial.' : ven + ' ventas confirmadas.') + (bad > 0 ? ' ' + pB + '% bad leads.' : '') + '</div></div>';
-  ahtml += '<div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">→ Próximo paso</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (cal > 0 ? 'Seguimiento de ' + cal + ' leads calificados. Medir show rate.' : 'Continuar generando volumen.') + '</div></div>';
-  ahtml += '</div>';
-  document.getElementById('fAnalysis').innerHTML = ahtml;
-}
-
 function renderFunnelHist() {
   var d = hRow(curMes);
   if (!d.length) return;
@@ -737,6 +654,9 @@ function renderHist() {
     var leads = toNum(d[7]);
     var cpl = toNum(d[8]);
     var cal = toNum(d[11]);
+    var ven = toNum(d[13]);
+    var ingreso = toNum(d[16]);
+    var roas = toNum(d[17]);
     var label = d[2] ? d[2].toUpperCase() : (mnames[i] || '').toUpperCase();
     var pI = maxInv > 0 ? Math.round(inv/maxInv*100) : 0;
     var pL = maxLeads > 0 ? Math.round(leads/maxLeads*100) : 0;
@@ -744,27 +664,45 @@ function renderHist() {
     html += '<div class="hiL">' + label + (i === 2 ? ' ●' : '') + '</div>';
     html += '<div style="margin-bottom:8px"><div class="his">INVERSIÓN</div><div class="hiv" style="color:var(--c)">' + ars(inv) + '</div><div class="hib"><div class="hibf" style="width:' + pI + '%;background:var(--c)"></div></div></div>';
     html += '<div style="margin-bottom:8px"><div class="his">LEADS</div><div class="hiv" style="color:var(--g)">' + leads + '</div><div class="hib"><div class="hibf" style="width:' + pL + '%;background:var(--g)"></div></div></div>';
-    html += '<div style="display:flex;justify-content:space-between;margin-top:6px"><div><div style="font-size:10px;color:var(--wm)">CPL</div><div style="font-size:14px;font-family:Bebas Neue,sans-serif;color:var(--y)">' + (cpl > 0 ? ars(cpl) : '—') + '</div></div><div><div style="font-size:10px;color:var(--wm)">CALIFIC.</div><div style="font-size:14px;font-family:Bebas Neue,sans-serif;color:var(--w)">' + (cal > 0 ? cal : '—') + '</div></div></div>';
+    var roasDisp = roas > 0 ? roas.toFixed(1) + 'x' : (ingreso > 0 && inv > 0 ? (ingreso/inv).toFixed(1) + 'x' : '—');
+    html += '<div style="display:flex;justify-content:space-between;margin-top:6px">';
+    html += '<div><div style="font-size:10px;color:var(--wm)">CPL</div><div style="font-size:14px;font-family:Bebas Neue,sans-serif;color:var(--y)">' + (cpl > 0 ? ars(cpl) : '—') + '</div></div>';
+    html += '<div><div style="font-size:10px;color:var(--wm)">VENTAS</div><div style="font-size:14px;font-family:Bebas Neue,sans-serif;color:var(--g)">' + (ven > 0 ? ven : '—') + '</div></div>';
+    html += '<div><div style="font-size:10px;color:var(--wm)">ROAS</div><div style="font-size:14px;font-family:Bebas Neue,sans-serif;color:' + (roasDisp !== '—' ? 'var(--c)' : 'var(--wm)') + '">' + roasDisp + '</div></div>';
+    html += '</div>';
     html += '</div>';
   }
   document.getElementById('histGrid').innerHTML = html;
 }
 
 function renderDiag() {
-  var tot = semData[4] || hRow(2) || [];
+  var tot, isSem;
+  if (curMes === 2 || curMes === 3) {
+    tot = semData[4] || [];
+    isSem = true;
+  } else {
+    tot = hRow(curMes);
+    isSem = false;
+  }
   if (!tot.length) return;
-  var tLeads = toNum(tot[9]);
-  var tCal = toNum(tot[13]);
-  var tCpl = toNum(tot[10]);
-  var tInv = toNum(tot[3]);
-  document.getElementById('dGood').innerHTML =
-    '<div class="dr"><span style="color:var(--g)">→</span>CPL ' + (tCpl > 0 ? ars(tCpl) : '—') + ' — sistema de adquisición eficiente</div>' +
-    '<div class="dr"><span style="color:var(--g)">→</span>' + tLeads + ' leads totales generados en el mes</div>' +
-    '<div class="dr"><span style="color:var(--g)">→</span>' + (tCal > 0 ? tCal + ' leads calificados' : 'Sistema de seguimiento activo') + '</div>';
-  document.getElementById('dWarn').innerHTML =
-    '<div class="dr"><span style="color:var(--y)">→</span>Cuello de botella en proceso comercial — medir show rate</div>' +
-    '<div class="dr"><span style="color:var(--y)">→</span>Inversión ' + (tInv > 0 ? ars(tInv) : '—') + ' — verificar distribución semanal</div>' +
-    '<div class="dr"><span style="color:var(--y)">→</span>Registrar ventas para calcular CAC y ROAS real</div>';
+  var tLeads = isSem ? toNum(tot[9]) : toNum(tot[7]);
+  var tCal   = isSem ? toNum(tot[13]) : toNum(tot[11]);
+  var tCpl   = isSem ? toNum(tot[10]) : toNum(tot[8]);
+  var tInv   = toNum(tot[3]);
+  var tRoas  = isSem ? 0 : toNum(tot[17]);
+  var tIngreso = isSem ? 0 : toNum(tot[16]);
+  var goodHtml = '<div class="dr"><span style="color:var(--g)">→</span>CPL ' + (tCpl > 0 ? ars(tCpl) : '—') + ' — sistema de adquisición eficiente</div>';
+  goodHtml += '<div class="dr"><span style="color:var(--g)">→</span>' + tLeads + ' leads totales generados en el mes</div>';
+  goodHtml += '<div class="dr"><span style="color:var(--g)">→</span>' + (tCal > 0 ? tCal + ' leads calificados — audiencia segmentada' : 'Sistema de seguimiento activo') + '</div>';
+  document.getElementById('dGood').innerHTML = goodHtml;
+  var warnHtml = '<div class="dr"><span style="color:var(--y)">→</span>Cuello de botella en proceso comercial — medir show rate</div>';
+  warnHtml += '<div class="dr"><span style="color:var(--y)">→</span>Inversión ' + (tInv > 0 ? ars(tInv) : '—') + ' — verificar distribución</div>';
+  if (tRoas > 0) {
+    warnHtml += '<div class="dr"><span style="color:var(--g)">→</span>ROAS ' + tRoas.toFixed(1) + 'x · Ingreso ' + (tIngreso > 0 ? ars(tIngreso) : '—') + '</div>';
+  } else {
+    warnHtml += '<div class="dr"><span style="color:var(--y)">→</span>Registrar ingresos para calcular ROAS real</div>';
+  }
+  document.getElementById('dWarn').innerHTML = warnHtml;
 }
 
 function selMes(idx) {
