@@ -425,7 +425,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 var URL_SEM_MAR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=475339073&single=true&output=csv";
 var URL_SEM_ABR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1403881619&single=true&output=csv";
 var URL_HIS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1500152970&single=true&output=csv";
-var URL_SEM = URL_SEM_ABR; // mes actual
+var URL_SEM = URL_SEM_ABR; // mes actual — se actualiza al cambiar de mes
 
 var semData = [];
 var histData = [];
@@ -523,7 +523,7 @@ async function loadData() {
 }
 
 function renderAll() {
-  if (curMes === 2) {
+  if (curMes === 2 || curMes === 3) {
     renderKPIs();
     renderTable();
     renderFunnel();
@@ -765,24 +765,24 @@ function selMes(idx) {
   }
   var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
   document.getElementById('metTitle').textContent = 'METRICAS CLAVE — ' + (names[idx] || '');
-  var esMesActual = idx === 3;
-  document.getElementById('wkSel').style.display = esMesActual ? 'block' : 'none';
-  document.getElementById('semSec').style.display = esMesActual ? 'block' : 'none';
-  if (esMesActual) {
-    // Cargar datos de abril si no están
-    if (semData.length === 0 || curMes !== idx) {
-      URL_SEM = URL_SEM_ABR;
-      loadData();
-    } else {
-      renderKPIs();
-      renderFunnel();
-    }
+  if (idx === 3) {
+    // ABRIL - modo semanal con datos en vivo
+    document.getElementById('wkSel').style.display = 'block';
+    document.getElementById('semSec').style.display = 'block';
+    URL_SEM = URL_SEM_ABR;
+    semData = [];
+    loadData();
   } else if (idx === 2) {
-    // Cargar datos de marzo
+    // MARZO - modo semanal con datos de marzo
+    document.getElementById('wkSel').style.display = 'block';
+    document.getElementById('semSec').style.display = 'block';
     URL_SEM = URL_SEM_MAR;
     semData = [];
     loadData();
   } else {
+    // ENE / FEB - solo historial
+    document.getElementById('wkSel').style.display = 'none';
+    document.getElementById('semSec').style.display = 'none';
     renderKPIsHist();
     renderFunnelHist();
   }
@@ -792,8 +792,10 @@ function selWk(idx) {
   curWk = idx;
   for (var i = 0; i < 4; i++) {
     var el = document.getElementById('wk' + i);
-    el.className = 'wb2' + (i === idx ? ' A' : '');
+    if (el) el.className = 'wb2' + (i === idx ? ' A' : '');
   }
+  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
+  document.getElementById('metTitle').textContent = 'METRICAS CLAVE — SEM ' + (idx+1) + ' · ' + (mesNames[curMes] || '');
   renderKPIs();
   renderFunnel();
 }
