@@ -318,7 +318,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <div class="tw">
       <div class="th"><span class="tt">RESUMEN SEMANAL</span><span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● DATOS EN VIVO</span></div>
       <div style="overflow-x:auto"><table>
-        <thead><tr><th>Semana</th><th>Inv. Ideal</th><th>Inv. Real</th><th>Leads</th><th>Calific.</th><th>Bad</th><th>Ventas</th><th>CPL Real</th><th>Scoring</th><th>Estado</th></tr></thead>
+        <thead><tr><th>Semana</th><th>Inv. Ideal</th><th>Inv. Real</th><th>Inv. con Imp.</th><th>Leads</th><th>Calific.</th><th>Bad</th><th>Ventas</th><th>CPL Real</th><th>Scoring</th><th>Estado</th></tr></thead>
         <tbody id="tBody"><tr><td colspan="10" style="text-align:center;padding:18px"><div class="sp" style="margin:0 auto"></div></td></tr></tbody>
       </table></div>
     </div>
@@ -551,18 +551,22 @@ function renderKPIs() {
   }
   var inv = toNum(d[3]);
   var invI = toNum(d[2]);
-  var leads = toNum(d[7]);
-  var cal = toNum(d[11]);
-  var bad = toNum(d[12]);
-  var ven = toNum(d[13]);
-  var cpl = toNum(d[8]);
-  var sc = toNum(d[14]);
-  var ctr = toNum(d[9]);
+  var banc = toNum(d[4]);
+  var prep = toNum(d[5]);
+  var leads = toNum(d[9]);
+  var cal = toNum(d[13]);
+  var bad = toNum(d[14]);
+  var ven = toNum(d[15]);
+  var cpl = toNum(d[10]);
+  var sc = toNum(d[16]);
+  var ctr = toNum(d[11]);
   var scv = sc > 0 ? Math.round(sc) : (leads > 0 ? Math.round(cal/leads*100) : 0);
   var delta = invI > 0 ? ((inv - invI) / invI * 100) : 0;
   document.getElementById('hScore').textContent = scv + '% SCORE';
+  // Add tax tooltip info to inv card handled below
   var html = '';
-  html += '<div class="kc"><div class="kl">Inversión Real</div><div class="kv C">' + ars(inv) + '</div><div class="ks">Ideal: ' + ars(invI) + '</div><span class="dl ' + (delta > 0 ? 'D' : 'U') + '">' + (delta > 0 ? '+' : '') + Math.abs(delta).toFixed(0) + '% vs ideal</span></div>';
+  var taxInfo = banc > 0 ? '<div style="margin-top:6px;border-top:1px solid var(--nb);padding-top:5px"><div style="font-size:10px;color:var(--y);font-family:DM Mono,monospace" title="Bancarizada: +30% Gan. +4.5% IIBB +1.2% Sellos">BANC ' + ars(banc) + '</div><div style="font-size:10px;color:var(--c);font-family:DM Mono,monospace;margin-top:2px" title="Prepaga (Lemon/Ualá): +21% IVA +4.5% IIBB">PREP ' + ars(prep) + '</div></div>' : '';
+  html += '<div class="kc"><div class="kl">Inversión Real</div><div class="kv C">' + ars(inv) + '</div><div class="ks">Ideal: ' + ars(invI) + '</div><span class="dl ' + (delta > 0 ? 'D' : 'U') + '">' + (delta > 0 ? '+' : '') + Math.abs(delta).toFixed(0) + '% vs ideal</span>' + taxInfo + '</div>';
   html += '<div class="kc"><div class="kl">Leads Totales</div><div class="kv">' + leads + '</div><div class="ks">CTR: ' + pct(ctr) + '</div><span class="dl ' + (leads > 0 ? 'U' : 'N') + '">' + (leads > 0 ? 'Activo' : '—') + '</span></div>';
   html += '<div class="kc"><div class="kl">Leads Calificados</div><div class="kv G">' + cal + '</div><div class="ks">De ' + leads + ' totales</div><span class="dl U">' + (leads > 0 ? Math.round(cal/leads*100) + '% calid.' : '—') + '</span></div>';
   html += '<div class="kc"><div class="kl">Bad Leads</div><div class="kv R">' + bad + '</div><div class="ks">' + (leads > 0 ? Math.round(bad/leads*100) + '% del total' : '—') + '</div><span class="dl ' + (leads > 0 && bad/leads < 0.15 ? 'U' : 'D') + '">' + (leads > 0 && bad/leads < 0.15 ? 'Bajo control' : 'Revisar') + '</span></div>';
@@ -580,10 +584,10 @@ function renderKPIsHist() {
     return;
   }
   var inv = toNum(d[3]);
-  var leads = toNum(d[7]);
-  var cal = toNum(d[11]);
-  var bad = toNum(d[12]);
-  var ven = toNum(d[13]);
+  var leads = toNum(d[9]);
+  var cal = toNum(d[13]);
+  var bad = toNum(d[14]);
+  var ven = toNum(d[15]);
   var cpl = toNum(d[8]);
   var ctr = toNum(d[9]);
   var sc = toNum(d[14]);
@@ -610,18 +614,22 @@ function renderTable() {
     var has = d.length > 0 && toNum(d[3]) > 0;
     var inv = has ? toNum(d[3]) : 0;
     var invI = toNum(d[2]) || ideals[i];
-    var leads = has ? toNum(d[7]) : 0;
-    var cal = has ? toNum(d[11]) : 0;
-    var bad = has ? toNum(d[12]) : 0;
-    var ven = has ? toNum(d[13]) : 0;
-    var cpl = has ? toNum(d[8]) : 0;
-    var sc = has ? toNum(d[14]) : 0;
+    var banc = has ? toNum(d[4]) : 0;
+    var prep = has ? toNum(d[5]) : 0;
+    var leads = has ? toNum(d[9]) : 0;
+    var cal = has ? toNum(d[13]) : 0;
+    var bad = has ? toNum(d[14]) : 0;
+    var ven = has ? toNum(d[15]) : 0;
+    var cpl = has ? toNum(d[10]) : 0;
+    var sc = has ? toNum(d[16]) : 0;
     var scv = sc > 0 ? Math.round(sc) : (leads > 0 ? Math.round(cal/leads*100) : 0);
     var est = !has ? '<span class="tag mt">Pendiente</span>' : (ven > 0 ? '<span class="tag ok">Con ventas</span>' : '<span class="tag ok">Activo</span>');
     html += '<tr>';
     html += '<td class="wl">Sem ' + (i+1) + '</td>';
     html += '<td style="color:var(--wm)">' + ars(invI) + '</td>';
     html += '<td style="color:' + (has && inv > invI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(inv) : '—') + '</td>';
+    var taxCell = has && banc > 0 ? '<div style="font-size:11px;color:var(--y)" title="Bancarizada: +30% Gan. +4.5% IIBB +1.2% Sellos">' + ars(banc) + ' <span style=\'font-size:9px;opacity:.6\'>BANC</span></div><div style="font-size:11px;color:var(--c);margin-top:2px" title="Prepaga (Lemon/Ualá): +21% IVA +4.5% IIBB">' + ars(prep) + ' <span style=\'font-size:9px;opacity:.6\'>PREP</span></div>' : '—';
+    html += '<td>' + taxCell + '</td>';
     html += '<td style="color:' + (leads > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? leads : '—') + '</td>';
     html += '<td>' + (has ? cal : '—') + '</td>';
     html += '<td>' + (has ? bad : '—') + '</td>';
@@ -633,14 +641,18 @@ function renderTable() {
   }
   var tot = semData[4] || [];
   if (tot.length && toNum(tot[3]) > 0) {
+    var tBanc = toNum(tot[4]);
+    var tPrep = toNum(tot[5]);
+    var tTaxCell = tBanc > 0 ? '<div style="font-size:11px;color:var(--y)" title="Bancarizada: +30% Gan. +4.5% IIBB +1.2% Sellos">' + ars(tBanc) + ' <span style=\'font-size:9px;opacity:.6\'>BANC</span></div><div style="font-size:11px;color:var(--c);margin-top:2px" title="Prepaga (Lemon/Ualá): +21% IVA +4.5% IIBB">' + ars(tPrep) + ' <span style=\'font-size:9px;opacity:.6\'>PREP</span></div>' : '—';
     html += '<tr style="background:rgba(0,194,224,0.06)">';
     html += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
     html += '<td style="color:var(--c)">' + ars(toNum(tot[3])) + '</td>';
-    html += '<td style="color:var(--g)">' + toNum(tot[7]) + '</td>';
-    html += '<td>' + toNum(tot[11]) + '</td>';
-    html += '<td>' + toNum(tot[12]) + '</td>';
-    html += '<td style="color:' + (toNum(tot[13]) > 0 ? 'var(--g)' : 'var(--wm)') + '">' + toNum(tot[13]) + '</td>';
-    html += '<td style="color:var(--g)">' + (toNum(tot[8]) > 0 ? ars(toNum(tot[8])) : '—') + '</td>';
+    html += '<td>' + tTaxCell + '</td>';
+    html += '<td style="color:var(--g)">' + toNum(tot[9]) + '</td>';
+    html += '<td>' + toNum(tot[13]) + '</td>';
+    html += '<td>' + toNum(tot[14]) + '</td>';
+    html += '<td style="color:' + (toNum(tot[15]) > 0 ? 'var(--g)' : 'var(--wm)') + '">' + toNum(tot[15]) + '</td>';
+    html += '<td style="color:var(--g)">' + (toNum(tot[10]) > 0 ? ars(toNum(tot[10])) : '—') + '</td>';
     html += '<td>—</td>';
     html += '<td><span class="tag ok">En curso</span></td>';
     html += '</tr>';
@@ -654,10 +666,10 @@ function renderFunnel() {
     document.getElementById('fSteps').innerHTML = '<div style="color:var(--wm);font-size:12px">Sin datos</div>';
     return;
   }
-  var leads = toNum(d[7]);
-  var cal = toNum(d[11]);
-  var bad = toNum(d[12]);
-  var ven = toNum(d[13]);
+  var leads = toNum(d[9]);
+  var cal = toNum(d[13]);
+  var bad = toNum(d[14]);
+  var ven = toNum(d[15]);
   var pC = leads > 0 ? Math.round(cal/leads*100) : 0;
   var pB = leads > 0 ? Math.round(bad/leads*100) : 0;
   var pV = leads > 0 ? (ven/leads*100).toFixed(1) : 0;
@@ -681,10 +693,10 @@ function renderFunnel() {
 function renderFunnelHist() {
   var d = hRow(curMes);
   if (!d.length) return;
-  var leads = toNum(d[7]);
-  var cal = toNum(d[11]);
-  var bad = toNum(d[12]);
-  var ven = toNum(d[13]);
+  var leads = toNum(d[9]);
+  var cal = toNum(d[13]);
+  var bad = toNum(d[14]);
+  var ven = toNum(d[15]);
   var cpl = toNum(d[8]);
   var pC = leads > 0 ? Math.round(cal/leads*100) : 0;
   var pB = leads > 0 ? Math.round(bad/leads*100) : 0;
@@ -741,9 +753,9 @@ function renderHist() {
 function renderDiag() {
   var tot = semData[4] || hRow(2) || [];
   if (!tot.length) return;
-  var tLeads = toNum(tot[7]);
-  var tCal = toNum(tot[11]);
-  var tCpl = toNum(tot[8]);
+  var tLeads = toNum(tot[9]);
+  var tCal = toNum(tot[13]);
+  var tCpl = toNum(tot[10]);
   var tInv = toNum(tot[3]);
   document.getElementById('dGood').innerHTML =
     '<div class="dr"><span style="color:var(--g)">→</span>CPL ' + (tCpl > 0 ? ars(tCpl) : '—') + ' — sistema de adquisición eficiente</div>' +
