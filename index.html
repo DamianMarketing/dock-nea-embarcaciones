@@ -577,6 +577,96 @@ function renderKPIs() {
   document.getElementById('kpiGrid').innerHTML = html;
 }
 
+function renderTable() {
+  var ideals = [114000,228000,342000,456000];
+  var html = '';
+  for (var i = 0; i < 4; i++) {
+    var d = wRow(i);
+    var has = d.length > 0 && toNum(d[3]) > 0;
+    var inv  = has ? toNum(d[3]) : 0;
+    var invI = toNum(d[2]) || ideals[i];
+    var banc = has ? toNum(d[4]) : 0;
+    var prep = has ? toNum(d[5]) : 0;
+    var leads = has ? toNum(d[9]) : 0;
+    var cal  = has ? toNum(d[13]) : 0;
+    var bad  = has ? toNum(d[14]) : 0;
+    var ven  = has ? toNum(d[15]) : 0;
+    var cpl  = has ? toNum(d[10]) : 0;
+    var sc   = has ? toNum(d[16]) : 0;
+    var scv  = sc > 0 ? Math.round(sc) : (leads > 0 ? Math.round(cal/leads*100) : 0);
+    var est  = !has ? '<span class="tag mt">Pendiente</span>' : (ven > 0 ? '<span class="tag ok">Con ventas</span>' : '<span class="tag ok">Activo</span>');
+    var taxCell = has && banc > 0
+      ? '<div style="font-size:10px;color:var(--y);line-height:1.6" title="Bancarizada: +30% Gan +4.5% IIBB +1.2% Sellos">' + ars(banc) + ' <span style="opacity:.6">BANC</span></div><div style="font-size:10px;color:var(--c);line-height:1.6" title="Prepaga Lemon/Uala: +21% IVA +4.5% IIBB">' + ars(prep) + ' <span style="opacity:.6">PREP</span></div>'
+      : '-';
+    html += '<tr>';
+    html += '<td class="wl">Sem ' + (i+1) + '</td>';
+    html += '<td style="color:var(--wm)">' + ars(invI) + '</td>';
+    html += '<td style="color:' + (has && inv > invI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(inv) : '-') + '</td>';
+    html += '<td>' + taxCell + '</td>';
+    html += '<td style="color:' + (leads > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? leads : '-') + '</td>';
+    html += '<td>' + (has ? cal : '-') + '</td>';
+    html += '<td>' + (has ? bad : '-') + '</td>';
+    html += '<td style="color:' + (ven > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? ven : '-') + '</td>';
+    html += '<td style="color:' + (cpl > 0 && cpl < 5000 ? 'var(--g)' : 'var(--y)') + '">' + (has && cpl > 0 ? ars(cpl) : '-') + '</td>';
+    html += '<td>' + (scv > 0 ? scv + '%' : '-') + '</td>';
+    html += '<td>' + est + '</td>';
+    html += '</tr>';
+  }
+  var tot = semData[4] || [];
+  if (tot.length && toNum(tot[3]) > 0) {
+    var tBanc = toNum(tot[4]);
+    var tPrep = toNum(tot[5]);
+    var tTax = tBanc > 0
+      ? '<div style="font-size:10px;color:var(--y)" title="Bancarizada: +30% Gan +4.5% IIBB +1.2% Sellos">' + ars(tBanc) + ' BANC</div><div style="font-size:10px;color:var(--c)" title="Prepaga: +21% IVA +4.5% IIBB">' + ars(tPrep) + ' PREP</div>'
+      : '-';
+    html += '<tr style="background:rgba(0,194,224,0.06)">';
+    html += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
+    html += '<td style="color:var(--c)">' + ars(toNum(tot[3])) + '</td>';
+    html += '<td>' + tTax + '</td>';
+    html += '<td style="color:var(--g)">' + toNum(tot[9]) + '</td>';
+    html += '<td>' + toNum(tot[13]) + '</td>';
+    html += '<td>' + toNum(tot[14]) + '</td>';
+    html += '<td style="color:' + (toNum(tot[15]) > 0 ? 'var(--g)' : 'var(--wm)') + '">' + toNum(tot[15]) + '</td>';
+    html += '<td style="color:var(--g)">' + (toNum(tot[10]) > 0 ? ars(toNum(tot[10])) : '-') + '</td>';
+    html += '<td>-</td>';
+    html += '<td><span class="tag ok">En curso</span></td>';
+    html += '</tr>';
+  }
+  document.getElementById('tBody').innerHTML = html;
+}
+
+function renderFunnel() {
+  var d = wRow(curWk);
+  if (!d.length) {
+    document.getElementById('fSteps').innerHTML = '<div style="color:var(--wm);font-size:12px">Sin datos</div>';
+    return;
+  }
+  var leads = toNum(d[9]);
+  var cal   = toNum(d[13]);
+  var bad   = toNum(d[14]);
+  var ven   = toNum(d[15]);
+  var pC = leads > 0 ? Math.round(cal/leads*100) : 0;
+  var pB = leads > 0 ? Math.round(bad/leads*100) : 0;
+  var pV = leads > 0 ? (ven/leads*100).toFixed(1) : 0;
+  var cpl = toNum(d[10]);
+  var inv = toNum(d[3]);
+  var invI = toNum(d[2]);
+  document.getElementById('fTitle').textContent = 'SEMANA ' + (curWk+1);
+  var html = '';
+  html += '<div class="fs"><div class="flab">Leads Totales</div><div class="fbw"><div class="fb" style="width:100%"></div></div><div class="fv">' + leads + '</div><div class="fp">100%</div></div>';
+  html += '<div class="fs"><div class="flab">Calificados</div><div class="fbw"><div class="fb" style="width:' + pC + '%;background:var(--g)"></div></div><div class="fv">' + cal + '</div><div class="fp">' + pC + '%</div></div>';
+  html += '<div class="fs"><div class="flab">Bad Leads</div><div class="fbw"><div class="fb" style="width:' + pB + '%;background:var(--r)"></div></div><div class="fv">' + bad + '</div><div class="fp">' + pB + '%</div></div>';
+  html += '<div class="fs"><div class="flab">Ventas</div><div class="fbw"><div class="fb" style="width:' + Math.min(pV,100) + '%;background:var(--y)"></div></div><div class="fv" style="color:' + (ven > 0 ? 'var(--g)' : 'var(--wm)') + '">' + ven + '</div><div class="fp">' + pV + '%</div></div>';
+  document.getElementById('fSteps').innerHTML = html;
+  var ahtml = '<div style="display:flex;flex-direction:column;gap:9px">';
+  ahtml += '<div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Positivo</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '-') + ' · ' + cal + ' calificados (' + pC + '%)</div></div>';
+  ahtml += '<div style="padding:11px;background:var(--yd);border-radius:8px;border-left:3px solid var(--y)"><div style="font-size:11px;color:var(--y);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Atencion</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (ven === 0 ? 'Sin ventas — activar seguimiento comercial.' : ven + ' ventas confirmadas.') + (bad > 0 ? ' ' + pB + '% bad leads.' : '') + '</div></div>';
+  ahtml += '<div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Proximo paso</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (cal > 0 ? 'Seguimiento de ' + cal + ' leads calificados.' : 'Continuar generando volumen.') + '</div></div>';
+  ahtml += '</div>';
+  document.getElementById('fAnalysis').innerHTML = ahtml;
+}
+
+
 function renderKPIsHist() {
   var d = hRow(curMes);
   if (!d.length) {
