@@ -523,11 +523,13 @@ async function loadData() {
 }
 
 function renderAll() {
-  if (curMes === 2 || curMes === 3) {
+  if (curMes === 3) {
+    // Solo ABRIL es semanal
     renderKPIs();
     renderTable();
     renderFunnel();
   } else {
+    // ENE, FEB, MAR son historiales
     renderKPIsHist();
     renderFunnelHist();
   }
@@ -770,10 +772,12 @@ function renderHist() {
 
 function renderDiag() {
   var tot, isSem;
-  if (curMes === 2 || curMes === 3) {
+  if (curMes === 3) {
+    // Solo ABRIL usa datos semanal
     tot = semData[4] || [];
     isSem = true;
   } else {
+    // ENE, FEB, MAR usan historial
     tot = hRow(curMes);
     isSem = false;
   }
@@ -809,21 +813,14 @@ function selMes(idx) {
   var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
   document.getElementById('metTitle').textContent = 'METRICAS CLAVE — ' + (names[idx] || '');
   if (idx === 3) {
-    // ABRIL - modo semanal con datos en vivo
+    // ABRIL - unico mes en modo semanal
     document.getElementById('wkSel').style.display = 'block';
     document.getElementById('semSec').style.display = 'block';
     URL_SEM = URL_SEM_ABR;
     semData = [];
     loadData();
-  } else if (idx === 2) {
-    // MARZO - modo semanal con datos de marzo
-    document.getElementById('wkSel').style.display = 'block';
-    document.getElementById('semSec').style.display = 'block';
-    URL_SEM = URL_SEM_MAR;
-    semData = [];
-    loadData();
   } else {
-    // ENE / FEB - solo historial
+    // ENE / FEB / MAR - todos en modo historial
     document.getElementById('wkSel').style.display = 'none';
     document.getElementById('semSec').style.display = 'none';
     renderKPIsHist();
@@ -837,8 +834,7 @@ function selWk(idx) {
     var el = document.getElementById('wk' + i);
     if (el) el.className = 'wb2' + (i === idx ? ' A' : '');
   }
-  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
-  document.getElementById('metTitle').textContent = 'METRICAS CLAVE — SEM ' + (idx+1) + ' · ' + (mesNames[curMes] || '');
+  document.getElementById('metTitle').textContent = 'METRICAS CLAVE — SEM ' + (idx+1) + ' · ABRIL 2026';
   renderKPIs();
   renderFunnel();
 }
