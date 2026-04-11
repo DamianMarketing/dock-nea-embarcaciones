@@ -496,7 +496,26 @@ function parseCsv(text) {
       cur += ch;
     }
     cols.push(cur.trim());
-    rows.push(cols);
+    // Fix: merge Argentine decimal numbers split by CSV comma
+    // e.g. ["22268", "89"] from "22268,89" -> ["22268.89"]
+    var fixed = [];
+    var k = 0;
+    while (k < cols.length) {
+      var curr = cols[k];
+      var next = cols[k+1];
+      // If current is all digits and next is 1-2 digits -> likely split decimal
+      if (next !== undefined &&
+          /^-?[0-9]+$/.test(curr) &&
+          /^[0-9]{1,2}$/.test(next) &&
+          k > 0) { // skip first cols which are text
+        fixed.push(curr + '.' + next);
+        k += 2;
+      } else {
+        fixed.push(curr);
+        k++;
+      }
+    }
+    rows.push(fixed);
   }
   return rows;
 }
