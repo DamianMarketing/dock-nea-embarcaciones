@@ -294,6 +294,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 
 <div class="tabs">
   <div class="tab A" id="tab-metricas" onclick="selTab('metricas')">📊 Métricas</div>
+  <div class="tab" id="tab-embarcaciones" onclick="selTab('embarcaciones')">🚤 Por Embarcación</div>
   <div class="tab" id="tab-acciones" onclick="selTab('acciones')">⚡ Acciones</div>
   <div class="tab" id="tab-estado" onclick="selTab('estado')">🎯 Estado</div>
   <div class="tab" id="tab-notas" onclick="selTab('notas')">📝 Notas</div>
@@ -332,6 +333,47 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
   <div class="tw" style="padding:16px">
     <div style="font-size:11px;color:var(--wm);margin-bottom:11px">Evolución desde el inicio de campañas · Enero → Marzo 2026</div>
     <div class="hg" id="histGrid"><div class="sp"></div></div>
+  </div>
+</div>
+
+<!-- EMBARCACIONES -->
+<div class="tc" id="tc-embarcaciones">
+  <div class="sh"><span class="sn">C1</span><span class="st2" id="embTitle">RENDIMIENTO POR EMBARCACIÓN — ABRIL 2026</span><div class="sl"></div></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="font-size:11px;color:var(--wm);font-family:'DM Mono',monospace">Filtrá por campaña:</div>
+    <div id="embFilters" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    <button onclick="campFilterAll()" id="btnTodas" style="padding:5px 13px;border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid var(--c);background:var(--c);color:var(--n);transition:all .2s;letter-spacing:1px">TODAS</button>
+  </div>
+  <div id="embGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:24px;">
+    <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div><div style="margin-top:9px;font-size:11px;color:var(--wm);font-family:'DM Mono',monospace;letter-spacing:2px">CARGANDO DATOS...</div></div>
+  </div>
+  <div class="sh"><span class="sn">C2</span><span class="st2">TABLA COMPARATIVA</span><div class="sl"></div></div>
+  <div class="tw" style="margin-bottom:24px">
+    <div class="th">
+      <span class="tt" id="embTableTitle">EMBARCACIONES · ABRIL 2026</span>
+      <span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● META ADS (PORTER)</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Campaña / Embarcación</th>
+          <th>Inversión</th>
+          <th>Inv. BANC</th>
+          <th>Inv. PREP</th>
+          <th>Leads</th>
+          <th>CPL Real</th>
+          <th>Impresiones</th>
+          <th>Alcance</th>
+          <th>Clics</th>
+          <th>CTR</th>
+          <th>Frecuencia</th>
+          <th>% Inv.</th>
+        </tr></thead>
+        <tbody id="embTableBody">
+          <tr><td colspan="12" style="text-align:center;padding:18px"><div class="sp" style="margin:0 auto"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -422,6 +464,8 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 </div>
 
 <script>
+var URL_PORTER = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=161235864&single=true&output=csv";
+var URL_EMBARCACIONES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1533501336&single=true&output=csv";
 var URL_SEM_MAR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=475339073&single=true&output=csv";
 var URL_SEM_ABR = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1403881619&single=true&output=csv";
 var URL_HIS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1500152970&single=true&output=csv";
@@ -429,6 +473,8 @@ var URL_SEM = URL_SEM_ABR; // mes actual — se actualiza al cambiar de mes
 
 var semData = [];
 var histData = [];
+var porterData = [];
+var embData = [];
 var curWk = 0;
 var curMes = 3;
 
@@ -497,10 +543,16 @@ async function loadData() {
     var t = Date.now();
     var r1 = await fetch(URL_SEM + '&t=' + t);
     var r2 = await fetch(URL_HIS + '&t=' + t);
+    var r3 = await fetch(URL_PORTER + '&t=' + t);
+    var r4 = await fetch(URL_EMBARCACIONES + '&t=' + t);
     var txt1 = await r1.text();
     var txt2 = await r2.text();
+    var txt3 = await r3.text();
+    var txt4 = await r4.text();
     var rows1 = parseCsv(txt1);
     var rows2 = parseCsv(txt2);
+    var rows3 = parseCsv(txt3);
+    var rows4 = parseCsv(txt4);
     semData = [];
     for (var i = 1; i < rows1.length; i++) {
       if (rows1[i][0] && rows1[i][0].trim() !== '') semData.push(rows1[i]);
@@ -508,6 +560,14 @@ async function loadData() {
     histData = [];
     for (var i = 1; i < rows2.length; i++) {
       if (rows2[i][0] && rows2[i][0].trim() !== '') histData.push(rows2[i]);
+    }
+    porterData = [];
+    for (var i = 1; i < rows3.length; i++) {
+      if (rows3[i][0] && rows3[i][0].trim() !== '') porterData.push(rows3[i]);
+    }
+    embData = [];
+    for (var i = 1; i < rows4.length; i++) {
+      if (rows4[i][0] && rows4[i][0].trim() !== '') embData.push(rows4[i]);
     }
     var now = new Date();
     document.getElementById('syncTime').textContent = 'Sync ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -826,6 +886,9 @@ function selMes(idx) {
     renderKPIsHist();
     renderFunnelHist();
   }
+  // Update campanas tab title if visible
+  var embTab = document.getElementById('tc-embarcaciones');
+  if (embTab && embTab.className.indexOf('A') > -1) renderEmbarcaciones();
 }
 
 function selWk(idx) {
@@ -840,11 +903,239 @@ function selWk(idx) {
 }
 
 function selTab(id) {
-  var tabs = ['metricas','acciones','estado','notas'];
+  var tabs = ['metricas','embarcaciones','acciones','estado','notas'];
   for (var i = 0; i < tabs.length; i++) {
     document.getElementById('tab-' + tabs[i]).className = 'tab' + (tabs[i] === id ? ' A' : '');
     document.getElementById('tc-' + tabs[i]).className = 'tc' + (tabs[i] === id ? ' A' : '');
   }
+  if (id === 'embarcaciones') renderEmbarcaciones();
+}
+
+// EMBARCACIONES
+var embFilter = 'TODAS';
+var embNames = [];
+var embSemFilter = 'TODAS';
+
+function getMesLabelEmb() {
+  var names = ['Enero','Febrero','Marzo','Abril'];
+  return names[curMes] || 'Abril';
+}
+
+function filtrarEmbPorMes(rows) {
+  var mesLabel = getMesLabelEmb();
+  var filtered = [];
+  for (var i = 0; i < rows.length; i++) {
+    var mes = (rows[i][2] || '').toLowerCase();
+    if (mes === mesLabel.toLowerCase()) filtered.push(rows[i]);
+  }
+  return filtered;
+}
+
+function agruparEmb(rows, porSemana) {
+  var map = {};
+  for (var i = 0; i < rows.length; i++) {
+    var d = rows[i];
+    var nombre = (d[0] || '').trim();
+    var semana = (d[4] || '').trim();
+    var key = porSemana ? nombre + '||' + semana : nombre;
+    if (!map[key]) {
+      map[key] = {
+        nombre: nombre, semana: semana, key: key,
+        inv: 0, banc: 0, prep: 0, imp: 0, alc: 0, clics: 0,
+        ctr: 0, leads: 0, cpl: 0, freq: 0,
+        calific: toNum(d[15]), bad: toNum(d[16]),
+        ventas: toNum(d[17]), scoring: toNum(d[18]),
+        ingreso: toNum(d[21]), roas: toNum(d[22])
+      };
+    }
+    map[key].inv    += toNum(d[5]);
+    map[key].banc   += toNum(d[6]);
+    map[key].prep   += toNum(d[7]);
+    map[key].imp    += toNum(d[8]);
+    map[key].alc    += toNum(d[9]);
+    map[key].clics  += toNum(d[10]);
+    map[key].leads  += toNum(d[12]);
+    // Manuales: tomar el ultimo valor no cero
+    if (toNum(d[15]) > 0) map[key].calific = toNum(d[15]);
+    if (toNum(d[16]) > 0) map[key].bad = toNum(d[16]);
+    if (toNum(d[17]) > 0) map[key].ventas = toNum(d[17]);
+    if (toNum(d[18]) > 0) map[key].scoring = toNum(d[18]);
+    if (toNum(d[21]) > 0) map[key].ingreso = toNum(d[21]);
+    if (toNum(d[22]) > 0) map[key].roas = toNum(d[22]);
+  }
+  var result = [];
+  for (var k in map) {
+    var e = map[k];
+    e.cpl  = e.leads > 0 ? e.inv / e.leads : 0;
+    e.ctr  = e.imp > 0 ? (e.clics / e.imp) * 100 : 0;
+    result.push(e);
+  }
+  result.sort(function(a,b) { return b.inv - a.inv; });
+  return result;
+}
+
+function embFilterAll() {
+  embFilter = 'TODAS';
+  document.querySelectorAll('.emb-filter-btn').forEach(function(b) { b.className = 'wb2 emb-filter-btn'; });
+  document.getElementById('btnEmbTodas').className = 'wb2 A';
+  renderEmbarcaciones();
+}
+
+function setEmbFilterIdx(idx, el) {
+  if (embNames[idx]) embFilter = embNames[idx];
+  document.querySelectorAll('.emb-filter-btn').forEach(function(b) { b.className = 'wb2 emb-filter-btn'; });
+  el.className = 'wb2 A emb-filter-btn';
+  document.getElementById('btnEmbTodas').className = 'wb2';
+  renderEmbarcaciones();
+}
+
+var semanasList = [];
+
+function resetSemFiltro() {
+  embSemFilter = 'TODAS';
+  renderEmbarcaciones();
+}
+
+function setSemFiltro(idx, el) {
+  if (semanasList[idx]) embSemFilter = semanasList[idx];
+  renderEmbarcaciones();
+}
+
+function renderEmbarcaciones() {
+  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
+  var mesLabel = mesNames[curMes] || 'ABRIL 2026';
+  document.getElementById('embTitle').textContent = 'RENDIMIENTO POR EMBARCACION — ' + mesLabel;
+  document.getElementById('embTableTitle').textContent = 'EMBARCACIONES · ' + mesLabel;
+
+  if (!embData.length) {
+    document.getElementById('embGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-size:12px">Sin datos. Actualizá el dashboard.</div>';
+    return;
+  }
+
+  var filtered = filtrarEmbPorMes(embData);
+  if (!filtered.length) {
+    document.getElementById('embGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-size:12px">Sin datos para ' + mesLabel + '</div>';
+    return;
+  }
+
+  // Get unique semanas for filter
+  var semanas = [];
+  for (var i = 0; i < filtered.length; i++) {
+    var s = filtered[i][4];
+    if (s && semanas.indexOf(s) === -1) semanas.push(s);
+  }
+  semanas.sort();
+
+  // Build semana filter buttons
+  semanasList = semanas.slice();
+  var semHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">';
+  semHtml += '<span style="font-size:10px;color:var(--wm);font-family:DM Mono,monospace">Semana:</span>';
+  semHtml += '<button onclick="resetSemFiltro()" id="btnSemTodas" style="padding:4px 11px;border-radius:5px;font-size:10px;font-family:DM Mono,monospace;cursor:pointer;border:1px solid var(--c);background:var(--c);color:var(--n)">TODAS</button>';
+  for (var i = 0; i < semanas.length; i++) {
+    semHtml += '<button onclick="setSemFiltro(' + i + ',this)" style="padding:4px 11px;border-radius:5px;font-size:10px;font-family:DM Mono,monospace;cursor:pointer;border:1px solid var(--nb);background:var(--nc);color:var(--wm)">' + semanas[i] + '</button>';
+  }
+  semHtml += '</div>';
+
+  // Apply semana filter
+  var semFiltered = embSemFilter === 'TODAS' ? filtered : filtered.filter(function(r) { return r[4] === embSemFilter; });
+
+  // Group by embarcacion
+  var grouped = agruparEmb(semFiltered, false);
+  var totalInv = 0;
+  for (var i = 0; i < grouped.length; i++) totalInv += grouped[i].inv;
+
+  // Build embarcacion filter buttons
+  embNames = [];
+  var filtersHtml = '';
+  for (var i = 0; i < grouped.length; i++) {
+    embNames.push(grouped[i].nombre);
+    var shortN = grouped[i].nombre.replace('Form1_','').replace('Form_','').replace(/_/g,' ');
+    if (shortN.length > 30) shortN = shortN.substring(0,30) + '...';
+    filtersHtml += '<button class="wb2 emb-filter-btn" onclick="setEmbFilterIdx(' + i + ',this)" title="' + grouped[i].nombre + '">' + shortN + '</button>';
+  }
+  document.getElementById('embFilters').innerHTML =
+    semHtml +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px">' +
+    '<span style="font-size:10px;color:var(--wm);font-family:DM Mono,monospace">Embarcación:</span>' +
+    '<button class="wb2 A" id="btnEmbTodas" onclick="embFilterAll()">TODAS</button>' +
+    filtersHtml + '</div>';
+
+  // Apply embarcacion filter
+  var display = embFilter === 'TODAS' ? grouped : grouped.filter(function(e) { return e.nombre === embFilter; });
+
+  // Build cards
+  var cardsHtml = '';
+  for (var i = 0; i < display.length; i++) {
+    var e = display[i];
+    var pctInv = totalInv > 0 ? (e.inv/totalInv*100).toFixed(1) : 0;
+    var shortName = e.nombre.replace('Form1_','').replace('Form_','').replace(/_/g,' ');
+    var scv = e.scoring > 0 ? e.scoring : (e.leads > 0 && e.calific > 0 ? Math.round(e.calific/e.leads*100) : 0);
+
+    cardsHtml += '<div class="kc" style="border-radius:12px;padding:16px">';
+    cardsHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;color:var(--c);margin-bottom:12px;border-bottom:1px solid var(--nb);padding-bottom:8px" title="' + e.nombre + '">' + shortName + '</div>';
+    cardsHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    // Inversion
+    cardsHtml += '<div><div style="font-size:9px;color:var(--wm);letter-spacing:1px;margin-bottom:2px">INVERSIÓN</div>';
+    cardsHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--c)">' + ars(e.inv) + '</div>';
+    cardsHtml += '<div style="font-size:10px;color:var(--y)" title="Bancarizada: +30% Gan +4.5% IIBB +1.2% Sellos">BANC ' + ars(e.banc) + '</div>';
+    cardsHtml += '<div style="font-size:10px;color:var(--c)" title="Prepaga: +21% IVA +4.5% IIBB">PREP ' + ars(e.prep) + '</div></div>';
+    // Leads
+    cardsHtml += '<div><div style="font-size:9px;color:var(--wm);letter-spacing:1px;margin-bottom:2px">LEADS / CPL</div>';
+    cardsHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--g)">' + (e.leads > 0 ? e.leads : '-') + '</div>';
+    cardsHtml += '<div style="font-size:10px;color:var(--y)">CPL ' + (e.cpl > 0 ? ars(e.cpl) : '-') + '</div>';
+    cardsHtml += '<div style="font-size:10px;color:var(--wm)">CALIF. ' + (e.calific > 0 ? e.calific : '-') + '</div></div>';
+    // Impresiones
+    cardsHtml += '<div><div style="font-size:9px;color:var(--wm);letter-spacing:1px;margin-bottom:2px">IMP / ALC</div>';
+    cardsHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--w)">' + e.imp.toLocaleString('es-AR') + '</div>';
+    cardsHtml += '<div style="font-size:10px;color:var(--wm)">ALC ' + e.alc.toLocaleString('es-AR') + '</div></div>';
+    // CTR / Ventas
+    cardsHtml += '<div><div style="font-size:9px;color:var(--wm);letter-spacing:1px;margin-bottom:2px">CTR / VENTAS</div>';
+    cardsHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--w)">' + e.ctr.toFixed(2) + '%</div>';
+    cardsHtml += '<div style="font-size:10px;color:' + (e.ventas > 0 ? 'var(--g)' : 'var(--wm)') + '">VENTAS ' + (e.ventas > 0 ? e.ventas : '-') + '</div></div>';
+    cardsHtml += '</div>';
+    // Extra metrics row
+    cardsHtml += '<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--nb)">';
+    cardsHtml += '<div style="text-align:center"><div style="font-size:9px;color:var(--wm)">SCORING</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:' + (scv >= 80 ? 'var(--g)' : 'var(--y)') + '">' + (scv > 0 ? scv + '%' : '-') + '</div></div>';
+    cardsHtml += '<div style="text-align:center"><div style="font-size:9px;color:var(--wm)">BAD</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--r)">' + (e.bad > 0 ? e.bad : '-') + '</div></div>';
+    cardsHtml += '<div style="text-align:center"><div style="font-size:9px;color:var(--wm)">INGRESO</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--g)">' + (e.ingreso > 0 ? ars(e.ingreso) : '-') + '</div></div>';
+    cardsHtml += '<div style="text-align:center"><div style="font-size:9px;color:var(--wm)">ROAS</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:' + (e.roas > 0 ? 'var(--c)' : 'var(--wm)') + '">' + (e.roas > 0 ? e.roas.toFixed(1) + 'x' : '-') + '</div></div>';
+    cardsHtml += '</div>';
+    // Progress bar
+    cardsHtml += '<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><div style="font-size:9px;color:var(--wm)">% del presupuesto</div><div style="font-size:9px;color:var(--c);font-family:DM Mono,monospace">' + pctInv + '%</div></div>';
+    cardsHtml += '<div style="height:3px;background:var(--nb);border-radius:2px"><div style="height:3px;width:' + Math.min(pctInv,100) + '%;background:var(--c);border-radius:2px"></div></div></div>';
+    cardsHtml += '</div>';
+  }
+  document.getElementById('embGrid').innerHTML = cardsHtml;
+
+  // Build table
+  var tableHtml = '';
+  for (var i = 0; i < display.length; i++) {
+    var e = display[i];
+    var pct2 = totalInv > 0 ? (e.inv/totalInv*100).toFixed(1) : 0;
+    var shortN = e.nombre.replace('Form1_','').replace('Form_','').replace(/_/g,' ');
+    if (shortN.length > 35) shortN = shortN.substring(0,35) + '...';
+    var scv2 = e.scoring > 0 ? e.scoring : (e.leads > 0 && e.calific > 0 ? Math.round(e.calific/e.leads*100) : 0);
+    tableHtml += '<tr>';
+    tableHtml += '<td style="max-width:200px;white-space:normal;line-height:1.3" title="' + e.nombre + '"><span style="font-size:11px;color:var(--c)">' + shortN + '</span></td>';
+    tableHtml += '<td style="color:var(--c)">' + ars(e.inv) + '</td>';
+    tableHtml += '<td style="color:var(--y);font-size:11px" title="+30% Gan +4.5% IIBB +1.2% Sellos">' + ars(e.banc) + '</td>';
+    tableHtml += '<td style="color:var(--c);font-size:11px" title="+21% IVA +4.5% IIBB">' + ars(e.prep) + '</td>';
+    tableHtml += '<td>' + e.imp.toLocaleString('es-AR') + '</td>';
+    tableHtml += '<td>' + e.alc.toLocaleString('es-AR') + '</td>';
+    tableHtml += '<td>' + e.clics.toLocaleString('es-AR') + '</td>';
+    tableHtml += '<td>' + e.ctr.toFixed(2) + '%</td>';
+    tableHtml += '<td style="color:' + (e.leads > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (e.leads > 0 ? e.leads : '-') + '</td>';
+    tableHtml += '<td style="color:var(--y)">' + (e.cpl > 0 ? ars(e.cpl) : '-') + '</td>';
+    tableHtml += '<td>' + (e.calific > 0 ? e.calific : '-') + '</td>';
+    tableHtml += '<td style="color:var(--r)">' + (e.bad > 0 ? e.bad : '-') + '</td>';
+    tableHtml += '<td style="color:' + (e.ventas > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (e.ventas > 0 ? e.ventas : '-') + '</td>';
+    tableHtml += '<td style="color:' + (scv2 >= 80 ? 'var(--g)' : 'var(--y)') + '">' + (scv2 > 0 ? scv2 + '%' : '-') + '</td>';
+    tableHtml += '<td style="color:var(--g)">' + (e.ingreso > 0 ? ars(e.ingreso) : '-') + '</td>';
+    tableHtml += '<td style="color:var(--c)">' + (e.roas > 0 ? e.roas.toFixed(1) + 'x' : '-') + '</td>';
+    tableHtml += '<td><div style="display:flex;align-items:center;gap:5px"><div style="height:4px;width:' + Math.min(pct2*2,80) + 'px;background:var(--c);border-radius:2px"></div><span style="font-size:10px;color:var(--c)">' + pct2 + '%</span></div></td>';
+    tableHtml += '</tr>';
+  }
+  document.getElementById('embTableBody').innerHTML = tableHtml;
 }
 
 // ACCIONES
