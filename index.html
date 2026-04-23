@@ -1425,17 +1425,16 @@ function renderVCD() {
   });
   document.getElementById('vcdPipeline').innerHTML = pHtml;
 
-  // ── Funnel VCD ──
+  // ── Funnel VCD — pipeline CRM ──
   var funnelSteps = [
-    { label: 'Leads Totales', val: leads, color: 'var(--c)' },
-    { label: 'Nuevo Lead CRM', val: nvoLead, color: 'var(--wm)' },
-    { label: 'Contactados', val: contactado, color: 'var(--y)' },
-    { label: 'Acordados', val: acordadoCRM, color: 'var(--g)' },
-    { label: 'Publicando', val: publicando, color: 'var(--c)' }
+    { label: 'Total Pipeline',  val: pipelineTotal,  color: 'var(--c)' },
+    { label: 'Contactados',     val: contactado,      color: 'var(--y)' },
+    { label: 'Acordados',       val: acordadoCRM,     color: 'var(--g)' },
+    { label: 'Publicando',      val: publicando,      color: 'var(--c)' }
   ];
   var fHtml = '';
   funnelSteps.forEach(function(s) {
-    var p = leads > 0 ? (s.val / leads * 100).toFixed(1) : '0';
+    var p = pipelineTotal > 0 ? (s.val / pipelineTotal * 100).toFixed(1) : '0';
     fHtml += '<div class="fs"><div class="flab">' + s.label + '</div>';
     fHtml += '<div class="fbw"><div class="fb" style="width:' + Math.min(p, 100) + '%;background:' + s.color + '"></div></div>';
     fHtml += '<div class="fv" style="color:' + s.color + '">' + s.val + '</div>';
@@ -1445,10 +1444,11 @@ function renderVCD() {
 
   // ── Análisis ──
   var cpaAcord = acordadoCRM > 0 ? Math.round(inv / acordadoCRM) : 0;
+  var tasaConv = pipelineTotal > 0 ? (acordadoCRM / pipelineTotal * 100).toFixed(1) : '0';
   var aHtml = '<div style="display:flex;flex-direction:column;gap:9px">';
-  aHtml += '<div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Resultado</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '—') + ' · ' + acordadoCRM + ' acordados · CPA ' + (cpaAcord > 0 ? ars(cpaAcord) : '—') + '</div></div>';
-  aHtml += '<div style="padding:11px;background:var(--yd);border-radius:8px;border-left:3px solid var(--y)"><div style="font-size:11px;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Embudo</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + nvoLead + ' sin contactar · ' + contactado + ' en proceso · ' + (leads > 0 ? convRate + '% tasa leads→acordados' : 'Sin datos de conversión') + '</div></div>';
-  aHtml += '<div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Prioridad</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (nvoLead > 0 ? 'Contactar ' + nvoLead + ' leads sin contactar en <24hs.' : 'Pipeline al día.') + (contactado > 0 ? ' Agendar tasación con ' + contactado + ' contactados.' : '') + '</div></div>';
+  aHtml += '<div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Resultado</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + pipelineTotal + ' en pipeline · ' + acordadoCRM + ' acordados (' + tasaConv + '%) · CPA ' + (cpaAcord > 0 ? ars(cpaAcord) : '—') + '</div></div>';
+  aHtml += '<div style="padding:11px;background:var(--yd);border-radius:8px;border-left:3px solid var(--y)"><div style="font-size:11px;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Embudo</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + nvoLead + ' sin contactar · ' + contactado + ' en proceso · ' + acordadoCRM + ' acordados</div></div>';
+  aHtml += '<div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Prioridad</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (nvoLead > 0 ? 'Contactar ' + nvoLead + ' leads sin contactar en <24hs.' : 'Pipeline al día.') + (contactado > 0 ? ' Avanzar ' + contactado + ' contactados a tasación.' : '') + '</div></div>';
   aHtml += '</div>';
   document.getElementById('vcdAnalysis').innerHTML = aHtml;
 }
