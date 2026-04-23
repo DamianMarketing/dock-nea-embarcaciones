@@ -366,7 +366,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 
 <!-- VENDE CON DOCK -->
 <div class="tc" id="tc-vcd">
-  <div class="sh"><span class="sn">V1</span><span class="st2">VENDE CON DOCK — MÉTRICAS ABRIL 2026</span><div class="sl"></div></div>
+  <div class="sh"><span class="sn">V1</span><span class="st2" id="vcdTitle">VENDE CON DOCK — MÉTRICAS ABRIL 2026</span><div class="sl"></div></div>
   <!-- KPIs VCD -->
   <div class="kg" id="vcdKpiGrid">
     <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div></div>
@@ -499,6 +499,8 @@ var URL_SEM_ABR    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPP
 var URL_HIS        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1500152970&single=true&output=csv";
 // SEGUIMIENTO VCD — publicar la hoja "SEGUIMIENTO VCD" y reemplazar el gid
 var URL_VCD        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=842880315&single=true&output=csv";
+// HISTORIAL VCD — publicar la hoja "HISTORIAL VCD" y reemplazar el gid
+var URL_VCD_HIS    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1851875875&single=true&output=csv";
 
 var semData    = [];
 var histData   = [];
@@ -506,6 +508,7 @@ var porterData = [];
 var embData    = [];
 var embMesData = [];
 var vcdData    = [];
+var vcdHistData = []; // historial mensual VCD (MAR, ENE, FEB...)
 var curWk  = 0;
 var curMes = 3;
 
@@ -594,7 +597,8 @@ async function loadData() {
       porter: URL_PORTER  + '&t=' + t,
       embH:   URL_EMBARCACIONES + '&t=' + t,
       embM:   URL_EMB_MES + '&t=' + t,
-      vcd:    URL_VCD     + '&t=' + t
+      vcd:    URL_VCD     + '&t=' + t,
+      vcdHis: URL_VCD_HIS + '&t=' + t
     };
 
     var results = await Promise.all(Object.values(urls).map(function(u) {
@@ -621,6 +625,7 @@ async function loadData() {
     embData    = extractRows(parsed.embH);
     embMesData = extractRows(parsed.embM);
     vcdData    = extractRows(parsed.vcd);
+    vcdHistData = extractRows(parsed.vcdHis);
 
     var now = new Date();
     document.getElementById('syncTime').textContent = 'Sync ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -1205,6 +1210,7 @@ function selMes(idx) {
   }
   renderHist(); renderDiag();
   if (document.getElementById('tc-embarcaciones').className.indexOf('A') > -1) renderEmbarcaciones();
+  if (document.getElementById('tc-vcd').className.indexOf('A') > -1) renderVCD();
 }
 
 function selWk(idx) {
@@ -1238,15 +1244,55 @@ function selTab(id) {
 // Filas 8+ (índice 7+) = Pipeline CRM: [0]Etapa [1]Cantidad [2]%
 
 function renderVCD() {
-  if (!vcdData.length) {
-    document.getElementById('vcdKpiGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-family:DM Mono,monospace;font-size:11px">Sin datos. Publicá la hoja SEGUIMIENTO VCD y actualizá la URL_VCD en el dashboard.</div>';
+  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
+  var mesLabel = mesNames[curMes] || 'ABRIL 2026';
+
+  // ── Seleccionar fuente de datos según mes ──
+  // ABR 2026 → sheet SEGUIMIENTO VCD (vcdData)
+  // Otros meses → sheet HISTORIAL VCD (vcdHistData), filtrar por mes
+  var activeData, isHistorico;
+  if (curMes === 3) {
+    activeData = vcdData;
+    isHistorico = false;
+  } else {
+    // Historial: filas con col[0] = mesLabel o col[1] = mes num
+    var mLabel = ['Enero','Febrero','Marzo','Abril'][curMes];
+    activeData = vcdHistData.filter(function(r){
+      return (r[0]||'').toString().toLowerCase() === (mLabel||'').toLowerCase();
+    });
+    isHistorico = true;
+  }
+
+  // Título dinámico
+  document.getElementById('vcdTitle').textContent = 'VENDE CON DOCK — MÉTRICAS ' + mesLabel;
+
+  if (!activeData.length) {
+    var msg = isHistorico
+      ? 'Sin datos para ' + mesLabel + '. Ejecutá syncVCDHistorico en Apps Script para cargar el historial.'
+      : 'Sin datos. Publicá la hoja SEGUIMIENTO VCD y actualizá la URL_VCD en el dashboard.';
+    document.getElementById('vcdKpiGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-family:DM Mono,monospace;font-size:11px">' + msg + '</div>';
+    document.getElementById('vcdTableBody').innerHTML = '';
+    document.getElementById('vcdPipeline').innerHTML = '';
+    document.getElementById('vcdFunnel').innerHTML = '';
+    document.getElementById('vcdAnalysis').innerHTML = '';
     return;
   }
 
-  // Filas 0-3 = sem1-4, fila 4 = TOTAL, fila 5 = titulo CRM, fila 6 = headers CRM, fila 7+ = etapas
-  var semRows  = vcdData.slice(0, 4);
-  var totRow   = vcdData[4] || [];
-  var crmRows  = vcdData.slice(7); // etapas del pipeline — Nuevo Lead está en índice 7
+  // ── Parsear filas según origen ──
+  var semRows, totRow, crmRows;
+  if (!isHistorico) {
+    // Sheet SEGUIMIENTO VCD: filas 0-3=sems, 4=total, 7+=CRM
+    semRows = activeData.slice(0, 4);
+    totRow  = activeData[4] || [];
+    crmRows = activeData.slice(7);
+  } else {
+    // Historial VCD: estructura plana
+    // Col: [0]Mes [1]MesNum [2]InvIdeal [3]InvReal [4]Banc [5]Prep
+    // [6]Imp [7]Alc [8]Clics [9]Leads [10]CPL [11]CTR [12]Freq [13]Acordados
+    semRows = []; // No hay semanas en historial, solo total
+    totRow  = activeData[0] || [];
+    crmRows = []; // Pipeline siempre es estado actual
+  }
 
   // ── KPIs principales ──
   var inv     = toNum(totRow[3]);
@@ -1260,10 +1306,11 @@ function renderVCD() {
   var delta   = invI > 0 ? ((inv - invI) / invI * 100) : 0;
   var convRate = leads > 0 ? (acord / leads * 100).toFixed(1) : '0';
 
-  // Pipeline CRM
+  // Pipeline CRM — siempre estado actual (no cambia por mes)
   var pipeline = {};
   var pipelineTotal = 0;
-  crmRows.forEach(function(r) {
+  var pipelineSrc = vcdData.slice(7); // siempre del sheet actual
+  pipelineSrc.forEach(function(r) {
     if (!r[0] || r[0].toString().toLowerCase() === 'total') {
       if (r[0] && r[0].toString().toLowerCase() === 'total') pipelineTotal = toNum(r[1]);
       return;
@@ -1295,45 +1342,60 @@ function renderVCD() {
   // ── Tabla semanal ──
   var ideales = [50000, 100000, 150000, 200000];
   var tHtml = '';
-  for (var i = 0; i < 4; i++) {
-    var d = semRows[i] || [];
-    var has = d.length > 0 && toNum(d[3]) > 0;
-    var sInv  = has ? toNum(d[3]) : 0;
-    var sInvI = toNum(d[2]) || ideales[i];
-    var sBanc = has ? toNum(d[4]) : 0;
-    var sPrep = has ? toNum(d[5]) : 0;
-    var sLd   = has ? toNum(d[9]) : 0;
-    var sCpl  = has ? toNum(d[10]) : 0;
-    var sCtr  = has ? toNum(d[11]) : 0;
-    var sAc   = has ? toNum(d[13]) : 0;
-    var est   = !has ? '<span class="tag mt">Pendiente</span>' : (sAc > 0 ? '<span class="tag ok">Con acordados</span>' : '<span class="tag ok">Activo</span>');
-    var taxC  = has && sBanc > 0
-      ? '<div style="font-size:10px;color:var(--y)">' + ars(sBanc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(sPrep) + ' PREP</div>'
-      : '-';
-    tHtml += '<tr>';
-    tHtml += '<td class="wl">Sem ' + (i+1) + '</td>';
-    tHtml += '<td style="color:var(--wm)">' + ars(sInvI) + '</td>';
-    tHtml += '<td style="color:' + (has && sInv > sInvI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(sInv) : '-') + '</td>';
-    tHtml += '<td>' + taxC + '</td>';
-    tHtml += '<td style="color:' + (sLd > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? sLd : '-') + '</td>';
-    tHtml += '<td style="color:var(--y)">' + (has && sCpl > 0 ? ars(sCpl) : '-') + '</td>';
-    tHtml += '<td>' + (has ? pct(sCtr) : '-') + '</td>';
-    tHtml += '<td style="color:' + (sAc > 0 ? 'var(--g)' : 'var(--wm)') + ';font-weight:bold">' + (has ? sAc : '-') + '</td>';
-    tHtml += '<td>' + est + '</td>';
-    tHtml += '</tr>';
-  }
-  // Total
-  if (totRow.length && toNum(totRow[3]) > 0) {
+  if (isHistorico || semRows.length === 0) {
+    // Modo historial: solo mostrar fila total
     tHtml += '<tr style="background:rgba(0,194,224,0.06)">';
-    tHtml += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
+    tHtml += '<td class="wl" style="color:var(--w)" colspan="2">MES COMPLETO</td>';
     tHtml += '<td style="color:var(--c)">' + ars(inv) + '</td>';
     tHtml += '<td>' + (banc > 0 ? '<div style="font-size:10px;color:var(--y)">' + ars(banc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(prep) + ' PREP</div>' : '-') + '</td>';
     tHtml += '<td style="color:var(--g)">' + (leads || '-') + '</td>';
     tHtml += '<td style="color:var(--y)">' + (cpl > 0 ? ars(cpl) : '-') + '</td>';
     tHtml += '<td>' + (ctr > 0 ? pct(ctr) : '-') + '</td>';
     tHtml += '<td style="color:var(--g);font-weight:bold">' + (acord || '-') + '</td>';
-    tHtml += '<td><span class="tag ok">En curso</span></td>';
+    tHtml += '<td><span class="tag mt">Histórico</span></td>';
     tHtml += '</tr>';
+    tHtml += '<tr><td colspan="9" style="padding:10px;font-size:11px;color:var(--wm);font-family:DM Mono,monospace;text-align:center">Datos del mes completo · Sin desglose semanal en historial</td></tr>';
+  } else {
+    for (var i = 0; i < 4; i++) {
+      var d = semRows[i] || [];
+      var has = d.length > 0 && toNum(d[3]) > 0;
+      var sInv  = has ? toNum(d[3]) : 0;
+      var sInvI = toNum(d[2]) || ideales[i];
+      var sBanc = has ? toNum(d[4]) : 0;
+      var sPrep = has ? toNum(d[5]) : 0;
+      var sLd   = has ? toNum(d[9]) : 0;
+      var sCpl  = has ? toNum(d[10]) : 0;
+      var sCtr  = has ? toNum(d[11]) : 0;
+      var sAc   = has ? toNum(d[13]) : 0;
+      var est   = !has ? '<span class="tag mt">Pendiente</span>' : (sAc > 0 ? '<span class="tag ok">Con acordados</span>' : '<span class="tag ok">Activo</span>');
+      var taxC  = has && sBanc > 0
+        ? '<div style="font-size:10px;color:var(--y)">' + ars(sBanc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(sPrep) + ' PREP</div>'
+        : '-';
+      tHtml += '<tr>';
+      tHtml += '<td class="wl">Sem ' + (i+1) + '</td>';
+      tHtml += '<td style="color:var(--wm)">' + ars(sInvI) + '</td>';
+      tHtml += '<td style="color:' + (has && sInv > sInvI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(sInv) : '-') + '</td>';
+      tHtml += '<td>' + taxC + '</td>';
+      tHtml += '<td style="color:' + (sLd > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? sLd : '-') + '</td>';
+      tHtml += '<td style="color:var(--y)">' + (has && sCpl > 0 ? ars(sCpl) : '-') + '</td>';
+      tHtml += '<td>' + (has ? pct(sCtr) : '-') + '</td>';
+      tHtml += '<td style="color:' + (sAc > 0 ? 'var(--g)' : 'var(--wm)') + ';font-weight:bold">' + (has ? sAc : '-') + '</td>';
+      tHtml += '<td>' + est + '</td>';
+      tHtml += '</tr>';
+    }
+    // Total
+    if (totRow.length && toNum(totRow[3]) > 0) {
+      tHtml += '<tr style="background:rgba(0,194,224,0.06)">';
+      tHtml += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
+      tHtml += '<td style="color:var(--c)">' + ars(inv) + '</td>';
+      tHtml += '<td>' + (banc > 0 ? '<div style="font-size:10px;color:var(--y)">' + ars(banc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(prep) + ' PREP</div>' : '-') + '</td>';
+      tHtml += '<td style="color:var(--g)">' + (leads || '-') + '</td>';
+      tHtml += '<td style="color:var(--y)">' + (cpl > 0 ? ars(cpl) : '-') + '</td>';
+      tHtml += '<td>' + (ctr > 0 ? pct(ctr) : '-') + '</td>';
+      tHtml += '<td style="color:var(--g);font-weight:bold">' + (acord || '-') + '</td>';
+      tHtml += '<td><span class="tag ok">En curso</span></td>';
+      tHtml += '</tr>';
+    }
   }
   document.getElementById('vcdTableBody').innerHTML = tHtml;
 
