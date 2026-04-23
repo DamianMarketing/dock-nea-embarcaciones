@@ -1243,6 +1243,13 @@ function renderVCD() {
     return;
   }
 
+  // DEBUG — mostrar todas las filas para encontrar índices correctos
+  console.log('=== vcdData debug ===');
+  vcdData.forEach(function(r, i) {
+    console.log('vcdData['+i+']:', r[0], '|', r[1], '|', r[2]);
+  });
+  // FIN DEBUG
+
   // Filas 0-3 = sem1-4, fila 4 = TOTAL, fila 5 = vacía, fila 6 = header CRM, fila 7 = header cols, fila 8+ = etapas
   var semRows  = vcdData.slice(0, 4);
   var totRow   = vcdData[4] || [];
