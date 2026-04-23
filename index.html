@@ -278,6 +278,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 <div class="tabs">
   <div class="tab A" id="tab-metricas" onclick="selTab('metricas')">📊 Métricas</div>
   <div class="tab" id="tab-embarcaciones" onclick="selTab('embarcaciones')">🚤 Por Embarcación</div>
+  <div class="tab" id="tab-vcd" onclick="selTab('vcd')">🤝 Vende con Dock</div>
   <div class="tab" id="tab-acciones" onclick="selTab('acciones')">⚡ Acciones</div>
   <div class="tab" id="tab-estado" onclick="selTab('estado')">🎯 Estado</div>
   <div class="tab" id="tab-notas" onclick="selTab('notas')">📝 Notas</div>
@@ -363,6 +364,43 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
   <!-- v4.2 fin embarcaciones -->
 </div>
 
+<!-- VENDE CON DOCK -->
+<div class="tc" id="tc-vcd">
+  <div class="sh"><span class="sn">V1</span><span class="st2">VENDE CON DOCK — MÉTRICAS ABRIL 2026</span><div class="sl"></div></div>
+  <!-- KPIs VCD -->
+  <div class="kg" id="vcdKpiGrid">
+    <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div></div>
+  </div>
+  <!-- Tabla semanal VCD -->
+  <div class="sh"><span class="sn">V2</span><span class="st2">SEGUIMIENTO SEMANAL — VENDE CON DOCK</span><div class="sl"></div></div>
+  <div class="tw" style="margin-bottom:24px">
+    <div class="th">
+      <span class="tt">RESUMEN SEMANAL VCD</span>
+      <span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● DATOS EN VIVO</span>
+    </div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Semana</th><th>Inv. Ideal</th><th>Inv. Real</th><th>Inv. con Imp.</th>
+        <th>Leads</th><th>CPL Real</th><th>CTR</th><th>Acordados</th><th>Estado</th>
+      </tr></thead>
+      <tbody id="vcdTableBody">
+        <tr><td colspan="9" style="text-align:center;padding:18px"><div class="sp" style="margin:0 auto"></div></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <!-- Pipeline CRM -->
+  <div class="sh"><span class="sn">V3</span><span class="st2">PIPELINE CRM — KANBAN GHL</span><div class="sl"></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px" id="vcdPipeline">
+    <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-size:12px">Cargando pipeline...</div>
+  </div>
+  <!-- Funnel VCD -->
+  <div class="sh"><span class="sn">V4</span><span class="st2">FUNNEL DE CONVERSIÓN — VCD</span><div class="sl"></div></div>
+  <div class="frow">
+    <div class="fc"><div class="ft">LEADS → ACORDADOS</div><div id="vcdFunnel"><div class="sp"></div></div></div>
+    <div class="fc"><div class="ft">ANÁLISIS VCD</div><div id="vcdAnalysis"><div class="sp"></div></div></div>
+  </div>
+</div>
+
 <!-- ACCIONES -->
 <div class="tc" id="tc-acciones">
   <div class="sh"><span class="sn">05</span><span class="st2">PRIORIDADES DE LA SEMANA</span><div class="sl"></div></div>
@@ -444,7 +482,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 </div>
 
 <footer>
-  <div class="fl3">DOCK NEA EMBARCACIONES · DASHBOARD v4.2 · DATOS EN VIVO · COMMAND 360</div>
+  <div class="fl3">DOCK NEA EMBARCACIONES · DASHBOARD v4.3 · DATOS EN VIVO · COMMAND 360</div>
   <div class="fr3">Arquitecto digital: <b>Damián Duarte</b> · Command 360</div>
 </footer>
 </div>
@@ -459,12 +497,15 @@ var URL_EMB_MES    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPP
 var URL_SEM_MAR    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=475339073&single=true&output=csv";
 var URL_SEM_ABR    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1403881619&single=true&output=csv";
 var URL_HIS        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1500152970&single=true&output=csv";
+// SEGUIMIENTO VCD — publicar la hoja "SEGUIMIENTO VCD" y reemplazar el gid
+var URL_VCD        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=842880315&single=true&output=csv";
 
 var semData    = [];
 var histData   = [];
 var porterData = [];
 var embData    = [];
 var embMesData = [];
+var vcdData    = [];
 var curWk  = 0;
 var curMes = 3;
 
@@ -552,7 +593,8 @@ async function loadData() {
       his:    URL_HIS     + '&t=' + t,
       porter: URL_PORTER  + '&t=' + t,
       embH:   URL_EMBARCACIONES + '&t=' + t,
-      embM:   URL_EMB_MES + '&t=' + t
+      embM:   URL_EMB_MES + '&t=' + t,
+      vcd:    URL_VCD     + '&t=' + t
     };
 
     var results = await Promise.all(Object.values(urls).map(function(u) {
@@ -578,6 +620,7 @@ async function loadData() {
     porterData = extractRows(parsed.porter);
     embData    = extractRows(parsed.embH);
     embMesData = extractRows(parsed.embM);
+    vcdData    = extractRows(parsed.vcd);
 
     var now = new Date();
     document.getElementById('syncTime').textContent = 'Sync ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -1175,12 +1218,177 @@ function selWk(idx) {
 }
 
 function selTab(id) {
-  var tabs = ['metricas','embarcaciones','acciones','estado','notas'];
+  var tabs = ['metricas','embarcaciones','vcd','acciones','estado','notas'];
   tabs.forEach(function(t){
     document.getElementById('tab-' + t).className = 'tab' + (t === id ? ' A' : '');
     document.getElementById('tc-' + t).className  = 'tc'  + (t === id ? ' A' : '');
   });
   if (id === 'embarcaciones') renderEmbarcaciones();
+  if (id === 'vcd') renderVCD();
+}
+
+// ═══════════════════════════════════════════════
+// VENDE CON DOCK
+// ═══════════════════════════════════════════════
+// Columnas de SEGUIMIENTO VCD (mismo orden que el script):
+// [0]Semana [1]Fechas [2]InvIdeal [3]InvReal [4]Banc [5]Prep
+// [6]Imp [7]Alc [8]Clics [9]Leads [10]CPL [11]CTR [12]Freq
+// [13]Acordados [14]Scoring
+// Fila 5 (índice 4) = TOTAL MES
+// Filas 8+ (índice 7+) = Pipeline CRM: [0]Etapa [1]Cantidad [2]%
+
+function renderVCD() {
+  if (!vcdData.length) {
+    document.getElementById('vcdKpiGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm);font-family:DM Mono,monospace;font-size:11px">Sin datos. Publicá la hoja SEGUIMIENTO VCD y actualizá la URL_VCD en el dashboard.</div>';
+    return;
+  }
+
+  // Filas 0-3 = sem1-4, fila 4 = TOTAL, fila 5 = vacía, fila 6 = header CRM, fila 7 = header cols, fila 8+ = etapas
+  var semRows  = vcdData.slice(0, 4);
+  var totRow   = vcdData[4] || [];
+  var crmRows  = vcdData.slice(8); // etapas del pipeline
+
+  // ── KPIs principales ──
+  var inv     = toNum(totRow[3]);
+  var invI    = toNum(totRow[2]);
+  var banc    = toNum(totRow[4]);
+  var prep    = toNum(totRow[5]);
+  var leads   = toNum(totRow[9]);
+  var cpl     = toNum(totRow[10]);
+  var ctr     = toNum(totRow[11]);
+  var acord   = toNum(totRow[13]);
+  var delta   = invI > 0 ? ((inv - invI) / invI * 100) : 0;
+  var convRate = leads > 0 ? (acord / leads * 100).toFixed(1) : '0';
+
+  // Pipeline CRM
+  var pipeline = {};
+  var pipelineTotal = 0;
+  crmRows.forEach(function(r) {
+    if (!r[0] || r[0].toString().toLowerCase() === 'total') {
+      if (r[0] && r[0].toString().toLowerCase() === 'total') pipelineTotal = toNum(r[1]);
+      return;
+    }
+    pipeline[r[0]] = { count: toNum(r[1]), pct: r[2] || '0%' };
+  });
+  if (!pipelineTotal) pipelineTotal = Object.values(pipeline).reduce(function(s,v){ return s + v.count; }, 0);
+
+  // ── KPI Grid ──
+  var taxInfo = banc > 0
+    ? '<div style="margin-top:5px;border-top:1px solid var(--nb);padding-top:4px"><div style="font-size:10px;color:var(--y)">BANC ' + ars(banc) + '</div><div style="font-size:10px;color:var(--c)">PREP ' + ars(prep) + '</div></div>'
+    : '';
+  var html = '';
+  html += '<div class="kc"><div class="kl">Inversión Real</div><div class="kv C">' + ars(inv) + '</div><div class="ks">Ideal: ' + ars(invI) + '</div><span class="dl ' + (delta > 5 ? 'D' : 'U') + '">' + (delta > 0 ? '+' : '') + delta.toFixed(0) + '% vs ideal</span>' + taxInfo + '</div>';
+  html += '<div class="kc"><div class="kl">Leads Totales</div><div class="kv">' + leads + '</div><div class="ks">CTR: ' + pct(ctr) + '</div><span class="dl ' + (leads > 0 ? 'U' : 'N') + '">' + (leads > 0 ? 'Activo' : 'Sin datos') + '</span></div>';
+  html += '<div class="kc"><div class="kl">CPL Real</div><div class="kv Y">' + (cpl > 0 ? ars(cpl) : '—') + '</div><div class="ks">Costo por lead</div><span class="dl N">VCD</span></div>';
+  html += '<div class="kc"><div class="kl">Acordados</div><div class="kv G">' + acord + '</div><div class="ks">Quieren vender con Dock</div><span class="dl ' + (acord > 0 ? 'U' : 'N') + '">' + convRate + '% de leads</span></div>';
+  // CRM KPIs
+  var nvoLead = pipeline['Nuevo Lead'] ? pipeline['Nuevo Lead'].count : 0;
+  var contactado = pipeline['Contactado'] ? pipeline['Contactado'].count : 0;
+  var acordadoCRM = pipeline['Acordado'] ? pipeline['Acordado'].count : 0;
+  var publicando = pipeline['Publicando'] ? pipeline['Publicando'].count : 0;
+  html += '<div class="kc"><div class="kl">Sin Contactar</div><div class="kv R">' + nvoLead + '</div><div class="ks">Nuevo Lead (CRM)</div><span class="dl D">Acción urgente</span></div>';
+  html += '<div class="kc"><div class="kl">Contactados</div><div class="kv Y">' + contactado + '</div><div class="ks">En proceso</div><span class="dl N">Seguimiento</span></div>';
+  html += '<div class="kc"><div class="kl">Acordados CRM</div><div class="kv G">' + acordadoCRM + '</div><div class="ks">Listos para publicar</div><span class="dl U">Avanzar</span></div>';
+  html += '<div class="kc"><div class="kl">Publicando</div><div class="kv C">' + publicando + '</div><div class="ks">Lanchas en plataformas</div><span class="dl U">Activo</span></div>';
+  document.getElementById('vcdKpiGrid').innerHTML = html;
+
+  // ── Tabla semanal ──
+  var ideales = [50000, 100000, 150000, 200000];
+  var tHtml = '';
+  for (var i = 0; i < 4; i++) {
+    var d = semRows[i] || [];
+    var has = d.length > 0 && toNum(d[3]) > 0;
+    var sInv  = has ? toNum(d[3]) : 0;
+    var sInvI = toNum(d[2]) || ideales[i];
+    var sBanc = has ? toNum(d[4]) : 0;
+    var sPrep = has ? toNum(d[5]) : 0;
+    var sLd   = has ? toNum(d[9]) : 0;
+    var sCpl  = has ? toNum(d[10]) : 0;
+    var sCtr  = has ? toNum(d[11]) : 0;
+    var sAc   = has ? toNum(d[13]) : 0;
+    var est   = !has ? '<span class="tag mt">Pendiente</span>' : (sAc > 0 ? '<span class="tag ok">Con acordados</span>' : '<span class="tag ok">Activo</span>');
+    var taxC  = has && sBanc > 0
+      ? '<div style="font-size:10px;color:var(--y)">' + ars(sBanc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(sPrep) + ' PREP</div>'
+      : '-';
+    tHtml += '<tr>';
+    tHtml += '<td class="wl">Sem ' + (i+1) + '</td>';
+    tHtml += '<td style="color:var(--wm)">' + ars(sInvI) + '</td>';
+    tHtml += '<td style="color:' + (has && sInv > sInvI ? 'var(--y)' : 'var(--g)') + '">' + (has ? ars(sInv) : '-') + '</td>';
+    tHtml += '<td>' + taxC + '</td>';
+    tHtml += '<td style="color:' + (sLd > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (has ? sLd : '-') + '</td>';
+    tHtml += '<td style="color:var(--y)">' + (has && sCpl > 0 ? ars(sCpl) : '-') + '</td>';
+    tHtml += '<td>' + (has ? pct(sCtr) : '-') + '</td>';
+    tHtml += '<td style="color:' + (sAc > 0 ? 'var(--g)' : 'var(--wm)') + ';font-weight:bold">' + (has ? sAc : '-') + '</td>';
+    tHtml += '<td>' + est + '</td>';
+    tHtml += '</tr>';
+  }
+  // Total
+  if (totRow.length && toNum(totRow[3]) > 0) {
+    tHtml += '<tr style="background:rgba(0,194,224,0.06)">';
+    tHtml += '<td class="wl" style="color:var(--w)" colspan="2">TOTAL MES</td>';
+    tHtml += '<td style="color:var(--c)">' + ars(inv) + '</td>';
+    tHtml += '<td>' + (banc > 0 ? '<div style="font-size:10px;color:var(--y)">' + ars(banc) + ' BANC</div><div style="font-size:10px;color:var(--c)">' + ars(prep) + ' PREP</div>' : '-') + '</td>';
+    tHtml += '<td style="color:var(--g)">' + (leads || '-') + '</td>';
+    tHtml += '<td style="color:var(--y)">' + (cpl > 0 ? ars(cpl) : '-') + '</td>';
+    tHtml += '<td>' + (ctr > 0 ? pct(ctr) : '-') + '</td>';
+    tHtml += '<td style="color:var(--g);font-weight:bold">' + (acord || '-') + '</td>';
+    tHtml += '<td><span class="tag ok">En curso</span></td>';
+    tHtml += '</tr>';
+  }
+  document.getElementById('vcdTableBody').innerHTML = tHtml;
+
+  // ── Pipeline Kanban ──
+  var etapas = ['Nuevo Lead','Contactado','Acordado','Publicando','Ads'];
+  var colors = {'Nuevo Lead':'var(--wm)','Contactado':'var(--y)','Acordado':'var(--g)','Publicando':'var(--c)','Ads':'var(--c)'};
+  var acciones = {
+    'Nuevo Lead':  'Contactar en <24hs',
+    'Contactado':  'Agendar visita / tasación',
+    'Acordado':    'Preparar contrato y publicar',
+    'Publicando':  'Monitorear anuncio específico',
+    'Ads':         'Optimizar campaña activa'
+  };
+  var pHtml = '';
+  etapas.forEach(function(e) {
+    var cnt  = pipeline[e] ? pipeline[e].count : 0;
+    var pctV = pipelineTotal > 0 ? (cnt / pipelineTotal * 100).toFixed(0) : 0;
+    var col  = colors[e] || 'var(--wm)';
+    var barW = Math.min(pctV, 100);
+    pHtml += '<div class="kc" style="border-radius:12px;padding:16px;border-left:3px solid ' + col + '">';
+    pHtml += '<div style="font-size:9px;color:var(--wm);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">' + e + '</div>';
+    pHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:36px;color:' + col + ';line-height:1">' + cnt + '</div>';
+    pHtml += '<div style="font-size:10px;color:var(--wm);margin-top:4px">' + pctV + '% del total</div>';
+    pHtml += '<div style="height:3px;background:var(--nb);border-radius:2px;margin:8px 0"><div style="height:3px;width:' + barW + '%;background:' + col + ';border-radius:2px"></div></div>';
+    pHtml += '<div style="font-size:10px;color:var(--wd);line-height:1.4">' + (acciones[e] || '') + '</div>';
+    pHtml += '</div>';
+  });
+  document.getElementById('vcdPipeline').innerHTML = pHtml;
+
+  // ── Funnel VCD ──
+  var funnelSteps = [
+    { label: 'Leads Totales', val: leads, color: 'var(--c)' },
+    { label: 'Nuevo Lead CRM', val: nvoLead, color: 'var(--wm)' },
+    { label: 'Contactados', val: contactado, color: 'var(--y)' },
+    { label: 'Acordados', val: acordadoCRM, color: 'var(--g)' },
+    { label: 'Publicando', val: publicando, color: 'var(--c)' }
+  ];
+  var fHtml = '';
+  funnelSteps.forEach(function(s) {
+    var p = leads > 0 ? (s.val / leads * 100).toFixed(1) : '0';
+    fHtml += '<div class="fs"><div class="flab">' + s.label + '</div>';
+    fHtml += '<div class="fbw"><div class="fb" style="width:' + Math.min(p, 100) + '%;background:' + s.color + '"></div></div>';
+    fHtml += '<div class="fv" style="color:' + s.color + '">' + s.val + '</div>';
+    fHtml += '<div class="fp">' + p + '%</div></div>';
+  });
+  document.getElementById('vcdFunnel').innerHTML = fHtml;
+
+  // ── Análisis ──
+  var cpaAcord = acordadoCRM > 0 ? Math.round(inv / acordadoCRM) : 0;
+  var aHtml = '<div style="display:flex;flex-direction:column;gap:9px">';
+  aHtml += '<div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Resultado</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '—') + ' · ' + acordadoCRM + ' acordados · CPA ' + (cpaAcord > 0 ? ars(cpaAcord) : '—') + '</div></div>';
+  aHtml += '<div style="padding:11px;background:var(--yd);border-radius:8px;border-left:3px solid var(--y)"><div style="font-size:11px;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Embudo</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + nvoLead + ' sin contactar · ' + contactado + ' en proceso · ' + (leads > 0 ? convRate + '% tasa leads→acordados' : 'Sin datos de conversión') + '</div></div>';
+  aHtml += '<div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Prioridad</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + (nvoLead > 0 ? 'Contactar ' + nvoLead + ' leads sin contactar en <24hs.' : 'Pipeline al día.') + (contactado > 0 ? ' Agendar tasación con ' + contactado + ' contactados.' : '') + '</div></div>';
+  aHtml += '</div>';
+  document.getElementById('vcdAnalysis').innerHTML = aHtml;
 }
 
 // ═══════════════════════════════════════════════
