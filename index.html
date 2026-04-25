@@ -321,6 +321,19 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <div style="font-size:11px;color:var(--wm);margin-bottom:11px">Evolución desde el inicio de campañas · Enero → Marzo 2026</div>
     <div class="hg" id="histGrid"><div class="sp"></div></div>
   </div>
+
+  <!-- PIPELINE CRM GENERAL -->
+  <div class="sh"><span class="sn">05</span><span class="st2">PIPELINE CRM — ESTADO COMERCIAL EN VIVO</span><div class="sl"></div></div>
+  <div style="font-size:11px;color:var(--wm);font-family:'DM Mono',monospace;margin-bottom:14px">Pipeline general · Todas las campañas · Estado actual del equipo comercial</div>
+
+  <!-- Kanban activo -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px" id="pipelineKanban">
+    <div style="grid-column:1/-1;padding:20px;text-align:center"><div class="sp"></div></div>
+  </div>
+
+  <!-- Fila secundaria: esperas + perdidos -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px" id="pipelineSecundario">
+  </div>
 </div>
 
 <!-- EMBARCACIONES -->
@@ -501,6 +514,8 @@ var URL_HIS        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPP
 var URL_VCD        = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=842880315&single=true&output=csv";
 // HISTORIAL VCD — publicar la hoja "HISTORIAL VCD" y reemplazar el gid
 var URL_VCD_HIS    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1851875875&single=true&output=csv";
+// PIPELINE GENERAL GHL — publicar hoja "PIPELINE CRM" y reemplazar gid
+var URL_PIPELINE   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThvdOjoPPzcuGeixylqlmG2fXmK3KmpMXshZl8EgE33FETzqyf01B31HdkMobqFSq6UNw-XHqkbwGF/pub?gid=1750004667&single=true&output=csv";
 
 var semData    = [];
 var histData   = [];
@@ -508,7 +523,8 @@ var porterData = [];
 var embData    = [];
 var embMesData = [];
 var vcdData    = [];
-var vcdHistData = []; // historial mensual VCD (MAR, ENE, FEB...)
+var vcdHistData = [];
+var pipelineData = []; // pipeline CRM general
 var curWk  = 0;
 var curMes = 3;
 
@@ -592,13 +608,14 @@ async function loadData() {
   try {
     var t = Date.now();
     var urls = {
-      sem:    URL_SEM_ABR + '&t=' + t,
-      his:    URL_HIS     + '&t=' + t,
-      porter: URL_PORTER  + '&t=' + t,
-      embH:   URL_EMBARCACIONES + '&t=' + t,
-      embM:   URL_EMB_MES + '&t=' + t,
-      vcd:    URL_VCD     + '&t=' + t,
-      vcdHis: URL_VCD_HIS + '&t=' + t
+      sem:      URL_SEM_ABR + '&t=' + t,
+      his:      URL_HIS     + '&t=' + t,
+      porter:   URL_PORTER  + '&t=' + t,
+      embH:     URL_EMBARCACIONES + '&t=' + t,
+      embM:     URL_EMB_MES + '&t=' + t,
+      vcd:      URL_VCD     + '&t=' + t,
+      vcdHis:   URL_VCD_HIS + '&t=' + t,
+      pipeline: URL_PIPELINE + '&t=' + t
     };
 
     var results = await Promise.all(Object.values(urls).map(function(u) {
@@ -624,8 +641,9 @@ async function loadData() {
     porterData = extractRows(parsed.porter);
     embData    = extractRows(parsed.embH);
     embMesData = extractRows(parsed.embM);
-    vcdData    = extractRows(parsed.vcd);
-    vcdHistData = extractRows(parsed.vcdHis);
+    vcdData      = extractRows(parsed.vcd);
+    vcdHistData  = extractRows(parsed.vcdHis);
+    pipelineData = extractRows(parsed.pipeline);
 
     var now = new Date();
     document.getElementById('syncTime').textContent = 'Sync ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -703,6 +721,7 @@ function renderAll() {
   }
   renderHist();
   renderDiag();
+  renderPipelineKanban();
 }
 
 // ═══════════════════════════════════════════════
@@ -959,6 +978,102 @@ function renderDiag() {
     (tRoas > 0
       ? '<div class="dr"><span style="color:var(--g)">→</span>ROAS ' + tRoas.toFixed(1) + 'x · Ingreso ' + (tIngreso > 0 ? ars(tIngreso) : '—') + '</div>'
       : '<div class="dr"><span style="color:var(--y)">→</span>Registrar ingresos para calcular ROAS real</div>');
+}
+
+// ═══════════════════════════════════════════════
+// PIPELINE CRM GENERAL
+// ═══════════════════════════════════════════════
+// Sheet PIPELINE CRM cols:
+// [0]Etapa [1]Cantidad [2]%delTotal [3]Tipo [4]UltimaSync
+
+// Etapas activas (kanban principal)
+var PIPELINE_ACTIVAS = [
+  { key: 'Ingreso de Lead',           color: 'var(--c)',  icon: '📥' },
+  { key: 'Contactado',                color: 'var(--y)',  icon: '📞' },
+  { key: 'No visto',                  color: 'var(--r)',  icon: '👻' },
+  { key: 'En negociación (Calificado)',color: 'var(--g)',  icon: '🤝' },
+  { key: 'Llamada/Visita agendada',   color: '#a78bfa',   icon: '📅' },
+  { key: 'Llamada/Visita Realizada',  color: '#34d399',   icon: '✅' },
+  { key: 'Vendido / Cliente / Ganado',color: 'var(--g)',  icon: '🏆' }
+];
+
+// Etapas secundarias (esperas + perdidos)
+var PIPELINE_SECUNDARIAS = [
+  { key: 'Esperar- 1-3 semanas',      color: 'var(--y)',  icon: '⏳' },
+  { key: 'Esperar- 1 Mes o mas',      color: 'var(--y)',  icon: '⌛' },
+  { key: 'Lead basura (No calificado)',color: 'var(--r)', icon: '🗑' },
+  { key: 'Prospección en Frío',       color: 'var(--wm)', icon: '❄️' },
+  { key: 'Reactivar Base de datos',   color: 'var(--wm)', icon: '🔄' }
+];
+
+function renderPipelineKanban() {
+  var kanban = document.getElementById('pipelineKanban');
+  var secundario = document.getElementById('pipelineSecundario');
+  if (!kanban) return;
+
+  if (!pipelineData.length) {
+    kanban.innerHTML = '<div style="grid-column:1/-1;padding:16px;text-align:center;color:var(--wm);font-size:11px;font-family:DM Mono,monospace">Sin datos. Publicá la hoja PIPELINE CRM y actualizá URL_PIPELINE.</div>';
+    return;
+  }
+
+  // Construir mapa etapa → cantidad
+  var etapaMap = {};
+  var totalActivos = 0;
+  var syncTime = '';
+  pipelineData.forEach(function(r) {
+    var etapa = (r[0] || '').toString().trim();
+    var cnt   = toNum(r[1]);
+    if (!etapa) return;
+    etapaMap[etapa] = cnt;
+    if (r[4] && !syncTime) syncTime = r[4];
+  });
+
+  // Total para porcentajes (suma de activas)
+  PIPELINE_ACTIVAS.forEach(function(e) {
+    totalActivos += etapaMap[e.key] || 0;
+  });
+  var totalGeneral = Object.values(etapaMap).reduce(function(s,v){ return s+v; }, 0);
+
+  // ── Kanban principal ──
+  var kHtml = '';
+  PIPELINE_ACTIVAS.forEach(function(e) {
+    var cnt  = etapaMap[e.key] || 0;
+    var pctV = totalGeneral > 0 ? (cnt / totalGeneral * 100).toFixed(0) : 0;
+    var barW = Math.min(pctV * 2, 100);
+    // Color de urgencia para "No visto"
+    var urgente = e.key === 'No visto' && cnt > 5;
+    kHtml += '<div class="kc" style="border-radius:12px;padding:14px;border-left:3px solid ' + e.color + ';' + (urgente ? 'box-shadow:0 0 12px rgba(255,77,106,0.3)' : '') + '">';
+    kHtml += '<div style="font-size:9px;color:var(--wm);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">' + e.icon + ' ' + e.key + '</div>';
+    kHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:32px;color:' + e.color + ';line-height:1">' + cnt + '</div>';
+    kHtml += '<div style="font-size:10px;color:var(--wm);margin-top:3px">' + pctV + '% del total</div>';
+    kHtml += '<div style="height:3px;background:var(--nb);border-radius:2px;margin-top:8px"><div style="height:3px;width:' + barW + '%;background:' + e.color + ';border-radius:2px"></div></div>';
+    if (urgente) kHtml += '<div style="font-size:9px;color:var(--r);margin-top:5px;font-family:DM Mono,monospace">⚠ Requiere contacto urgente</div>';
+    kHtml += '</div>';
+  });
+  kanban.innerHTML = kHtml;
+
+  // ── Secundarias: esperas + perdidos ──
+  var sHtml = '';
+  PIPELINE_SECUNDARIAS.forEach(function(e) {
+    var cnt  = etapaMap[e.key] || 0;
+    if (cnt === 0) return; // solo mostrar si tienen leads
+    var pctV = totalGeneral > 0 ? (cnt / totalGeneral * 100).toFixed(0) : 0;
+    sHtml += '<div class="kc" style="border-radius:10px;padding:12px;border-left:2px solid ' + e.color + ';opacity:0.8">';
+    sHtml += '<div style="font-size:9px;color:var(--wm);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">' + e.icon + ' ' + e.key + '</div>';
+    sHtml += '<div style="display:flex;align-items:baseline;gap:8px">';
+    sHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:22px;color:' + e.color + '">' + cnt + '</div>';
+    sHtml += '<div style="font-size:10px;color:var(--wm)">' + pctV + '%</div>';
+    sHtml += '</div></div>';
+  });
+
+  // Total general + sync time
+  sHtml += '<div class="kc" style="border-radius:10px;padding:12px;border-left:2px solid var(--c);background:rgba(0,194,224,0.06)">';
+  sHtml += '<div style="font-size:9px;color:var(--wm);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">📊 TOTAL PIPELINE</div>';
+  sHtml += '<div style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--c)">' + totalGeneral + '</div>';
+  if (syncTime) sHtml += '<div style="font-size:9px;color:var(--wm);font-family:DM Mono,monospace;margin-top:4px">Sync: ' + syncTime + '</div>';
+  sHtml += '</div>';
+
+  if (secundario) secundario.innerHTML = sHtml;
 }
 
 // ═══════════════════════════════════════════════
