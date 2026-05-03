@@ -260,7 +260,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
       <div><div class="al">Gestionado por</div><div class="an">Command 360</div></div>
     </div>
     <div class="hr">
-      <div class="bdg" id="curDate">ABR 2026</div>
+      <div class="bdg" id="curDate">MAY 2026</div>
       <div class="sb" id="syncBtn" onclick="loadData()">↻ Actualizar datos</div>
       <div class="st" id="syncTime"></div>
     </div>
@@ -270,7 +270,8 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <div class="mb" id="mb0" onclick="selMes(0)">ENE 2026</div>
     <div class="mb" id="mb1" onclick="selMes(1)">FEB 2026</div>
     <div class="mb" id="mb2" onclick="selMes(2)">MAR 2026</div>
-    <div class="mb cur A" id="mb3" onclick="selMes(3)">ABR 2026 ●</div>
+    <div class="mb" id="mb3" onclick="selMes(3)">ABR 2026</div>
+    <div class="mb cur A" id="mb4" onclick="selMes(4)">MAY 2026 ●</div>
     <span style="margin-left:auto;font-size:10px;color:var(--wm);font-family:'DM Mono',monospace">● mes actual</span>
   </div>
 </header>
@@ -302,7 +303,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
     <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div><div style="margin-top:9px;font-size:11px;color:var(--wm);font-family:'DM Mono',monospace;letter-spacing:2px">CARGANDO...</div></div>
   </div>
   <div id="semSec">
-    <div class="sh"><span class="sn">02</span><span class="st2">SEGUIMIENTO MENSUAL — ABRIL 2026</span><div class="sl"></div></div>
+    <div class="sh"><span class="sn">02</span><span class="st2">SEGUIMIENTO MENSUAL — MAYO 2026</span><div class="sl"></div></div>
     <div class="tw">
       <div class="th"><span class="tt">RESUMEN SEMANAL</span><span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● DATOS EN VIVO</span></div>
       <div style="overflow-x:auto"><table>
@@ -338,7 +339,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 
 <!-- EMBARCACIONES -->
 <div class="tc" id="tc-embarcaciones">
-  <div class="sh"><span class="sn">C1</span><span class="st2" id="embTitle">RENDIMIENTO POR EMBARCACIÓN — ABRIL 2026</span><div class="sl"></div></div>
+  <div class="sh"><span class="sn">C1</span><span class="st2" id="embTitle">RENDIMIENTO POR EMBARCACIÓN — MAYO 2026</span><div class="sl"></div></div>
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
     <div style="font-size:11px;color:var(--wm);font-family:'DM Mono',monospace">Filtrá por campaña:</div>
     <div id="embFilters" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -349,7 +350,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
   <div class="sh"><span class="sn">C2</span><span class="st2">TABLA COMPARATIVA</span><div class="sl"></div></div>
   <div class="tw" style="margin-bottom:24px">
     <div class="th">
-      <span class="tt" id="embTableTitle">EMBARCACIONES · ABRIL 2026</span>
+      <span class="tt" id="embTableTitle">EMBARCACIONES · MAYO 2026</span>
       <span style="font-size:11px;color:var(--g);font-family:'DM Mono',monospace">● META ADS (PORTER)</span>
     </div>
     <div style="overflow-x:auto">
@@ -379,7 +380,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
 
 <!-- VENDE CON DOCK -->
 <div class="tc" id="tc-vcd">
-  <div class="sh"><span class="sn">V1</span><span class="st2" id="vcdTitle">VENDE CON DOCK — MÉTRICAS ABRIL 2026</span><div class="sl"></div></div>
+  <div class="sh"><span class="sn">V1</span><span class="st2" id="vcdTitle">VENDE CON DOCK — MÉTRICAS MAYO 2026</span><div class="sl"></div></div>
   <!-- KPIs VCD -->
   <div class="kg" id="vcdKpiGrid">
     <div style="grid-column:1/-1;padding:30px;text-align:center"><div class="sp"></div></div>
@@ -526,7 +527,7 @@ var vcdData    = [];
 var vcdHistData = [];
 var pipelineData = []; // pipeline CRM general
 var curWk  = 0;
-var curMes = 3;
+var curMes = 4;
 
 // ═══════════════════════════════════════════════
 // CSV PARSER — SIN merge automático de decimales
@@ -711,7 +712,7 @@ function hRow(m) {
 }
 
 function renderAll() {
-  if (curMes === 3) {
+  if (curMes === 4) {
     renderKPIs();
     renderTable();
     renderFunnel();
@@ -907,7 +908,7 @@ function renderFunnelHist() {
   var pC = leads > 0 ? Math.round(cal/leads*100) : 0;
   var pB = leads > 0 ? Math.round(bad/leads*100) : 0;
   var pV = leads > 0 ? (ven/leads*100).toFixed(1) : '0.0';
-  var mnames = ['ENERO 2026','FEBRERO 2026','MARZO 2026'];
+  var mnames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
   document.getElementById('fTitle').textContent = mnames[curMes] || '—';
   var html = '';
   html += '<div class="fs"><div class="flab">Leads Totales</div><div class="fbw"><div class="fb" style="width:100%"></div></div><div class="fv">' + leads + '</div><div class="fp">100%</div></div>';
@@ -915,7 +916,7 @@ function renderFunnelHist() {
   html += '<div class="fs"><div class="flab">Bad Leads</div><div class="fbw"><div class="fb" style="width:' + pB + '%;background:var(--r)"></div></div><div class="fv">' + (bad||'—') + '</div><div class="fp">' + (pB > 0 ? pB + '%' : '—') + '</div></div>';
   html += '<div class="fs"><div class="flab">Ventas</div><div class="fbw"><div class="fb" style="width:' + Math.min(pV,100) + '%;background:var(--y)"></div></div><div class="fv" style="color:' + (ven > 0 ? 'var(--g)' : 'var(--wm)') + '">' + (ven||'—') + '</div><div class="fp">' + (ven > 0 ? pV + '%' : '—') + '</div></div>';
   document.getElementById('fSteps').innerHTML = html;
-  document.getElementById('fAnalysis').innerHTML = '<div style="display:flex;flex-direction:column;gap:9px"><div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);letter-spacing:1px;margin-bottom:3px">✓ RESULTADO DEL MES</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '—') + ' · ' + (cal > 0 ? cal + ' calificados' : 'Sin datos de calificación') + '</div></div><div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);letter-spacing:1px;margin-bottom:3px">→ COMPARAR</div><div style="font-size:12px;color:var(--wd)">Seleccioná ABR 2026 para ver el mes actual en detalle semanal.</div></div></div>';
+  document.getElementById('fAnalysis').innerHTML = '<div style="display:flex;flex-direction:column;gap:9px"><div style="padding:11px;background:var(--gd);border-radius:8px;border-left:3px solid var(--g)"><div style="font-size:11px;color:var(--g);letter-spacing:1px;margin-bottom:3px">✓ RESULTADO DEL MES</div><div style="font-size:12px;color:var(--wd);line-height:1.5">' + leads + ' leads · CPL ' + (cpl > 0 ? ars(cpl) : '—') + ' · ' + (cal > 0 ? cal + ' calificados' : 'Sin datos de calificación') + '</div></div><div style="padding:11px;background:var(--cd);border-radius:8px;border-left:3px solid var(--c)"><div style="font-size:11px;color:var(--c);letter-spacing:1px;margin-bottom:3px">→ COMPARAR</div><div style="font-size:12px;color:var(--wd)">Seleccioná MAY 2026 para ver el mes actual en detalle semanal.</div></div></div>';
 }
 
 // ═══════════════════════════════════════════════
@@ -959,7 +960,7 @@ function renderHist() {
 // ═══════════════════════════════════════════════
 function renderDiag() {
   var tot, isSem;
-  if (curMes === 3) { tot = semData[4] || []; isSem = true; }
+  if (curMes === 4) { tot = semData[4] || []; isSem = true; }
   else { tot = hRow(curMes); isSem = false; }
   if (!tot.length) return;
   var tLeads = isSem ? toNum(tot[S.leads])  : toNum(tot[9]);   // Leads Totales
@@ -1139,7 +1140,7 @@ var embSemFilter = 'TODAS';
 var semanasList  = [];
 
 function getMesLabelEmb() {
-  return ['Enero','Febrero','Marzo','Abril'][curMes] || 'Abril';
+  return ['Enero','Febrero','Marzo','Abril','Mayo'][curMes] || 'Mayo';
 }
 
 function filtrarEmbPorMes(rows) {
@@ -1201,12 +1202,12 @@ function resetSemFiltro() { embSemFilter = 'TODAS'; renderEmbarcaciones(); }
 function setSemFiltro(idx) { embSemFilter = semanasList[idx] || 'TODAS'; renderEmbarcaciones(); }
 
 function renderEmbarcaciones() {
-  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
-  var mesLabel = mesNames[curMes] || 'ABRIL 2026';
+  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026','MAYO 2026'];
+  var mesLabel = mesNames[curMes] || 'MAYO 2026';
   document.getElementById('embTitle').textContent = 'RENDIMIENTO POR EMBARCACIÓN — ' + mesLabel;
   document.getElementById('embTableTitle').textContent = 'EMBARCACIONES · ' + mesLabel;
 
-  var source = (curMes === 3) ? embMesData : filtrarEmbPorMes(embData);
+  var source = (curMes === 4) ? embMesData : filtrarEmbPorMes(embData);
   if (!source.length) {
     document.getElementById('embGrid').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--wm)">Sin datos para ' + mesLabel + '</div>';
     return;
@@ -1306,15 +1307,15 @@ function renderEmbarcaciones() {
 // ═══════════════════════════════════════════════
 function selMes(idx) {
   curMes = idx;
-  var btns = ['mb0','mb1','mb2','mb3'];
+  var btns = ['mb0','mb1','mb2','mb3','mb4'];
   btns.forEach(function(id, i){
     var el = document.getElementById(id);
     if (!el) return;
     el.className = 'mb' + (i === 3 ? ' cur' : '') + (i === idx ? ' A' : '');
   });
-  var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
+  var names = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026','MAYO 2026'];
   document.getElementById('metTitle').textContent = 'MÉTRICAS CLAVE — ' + (names[idx]||'');
-  if (idx === 3) {
+  if (idx === 4) {
     document.getElementById('wkSel').style.display = 'block';
     document.getElementById('semSec').style.display = 'block';
     renderKPIs(); renderTable(); renderFunnel();
@@ -1334,7 +1335,7 @@ function selWk(idx) {
     var el = document.getElementById('wk' + i);
     if (el) el.className = 'wb2' + (i === idx ? ' A' : '');
   }
-  document.getElementById('metTitle').textContent = 'MÉTRICAS CLAVE — SEM ' + (idx+1) + ' · ABRIL 2026';
+  document.getElementById('metTitle').textContent = 'MÉTRICAS CLAVE — SEM ' + (idx+1) + ' · MAYO 2026';
   renderKPIs(); renderFunnel();
 }
 
@@ -1359,19 +1360,18 @@ function selTab(id) {
 // Filas 8+ (índice 7+) = Pipeline CRM: [0]Etapa [1]Cantidad [2]%
 
 function renderVCD() {
-  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026'];
-  var mesLabel = mesNames[curMes] || 'ABRIL 2026';
+  var mesNames = ['ENERO 2026','FEBRERO 2026','MARZO 2026','ABRIL 2026','MAYO 2026'];
+  var mesLabel = mesNames[curMes] || 'MAYO 2026';
 
   // ── Seleccionar fuente de datos según mes ──
-  // ABR 2026 → sheet SEGUIMIENTO VCD (vcdData)
+  // MAY 2026 → sheet SEGUIMIENTO VCD (vcdData)
   // Otros meses → sheet HISTORIAL VCD (vcdHistData), filtrar por mes
   var activeData, isHistorico;
-  if (curMes === 3) {
+  if (curMes === 4) {
     activeData = vcdData;
     isHistorico = false;
   } else {
-    // Historial: filas con col[0] = mesLabel o col[1] = mes num
-    var mLabel = ['Enero','Febrero','Marzo','Abril'][curMes];
+    var mLabel = ['Enero','Febrero','Marzo','Abril','Mayo'][curMes];
     activeData = vcdHistData.filter(function(r){
       return (r[0]||'').toString().toLowerCase() === (mLabel||'').toLowerCase();
     });
