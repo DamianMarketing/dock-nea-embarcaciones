@@ -320,7 +320,7 @@ footer{border-top:1px solid var(--nb);padding:16px 0;margin-top:8px;display:flex
   </div>
   <div class="sh"><span class="sn">04</span><span class="st2">COMPARATIVO HISTÓRICO</span><div class="sl"></div></div>
   <div class="tw" style="padding:16px">
-    <div style="font-size:11px;color:var(--wm);margin-bottom:11px">Evolución desde el inicio de campañas · Enero → Marzo 2026</div>
+    <div style="font-size:11px;color:var(--wm);margin-bottom:11px">Evolución desde el inicio de campañas · Enero → Mayo 2026</div>
     <div class="hg" id="histGrid"><div class="sp"></div></div>
   </div>
 
@@ -932,10 +932,10 @@ function renderHist() {
     if (leads > maxLeads) maxLeads = leads;
   }
   var html = '';
-  var mnames = ['Enero','Febrero','Marzo'];
-  for (var i = 0; i < Math.min(histData.length, 3); i++) {
+  var mnames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio'];
+  for (var i = 0; i < Math.min(histData.length, 5); i++) {
     var d = histData[i];
-    var inv   = toNum(d[3]);   var leads = toNum(d[9]);   // Leads Totales
+    var inv   = toNum(d[3]);   var leads = toNum(d[9]);
     var cpl   = toNum(d[10]);  var cal   = toNum(d[13]);
     var ven   = toNum(d[15]);  var ingreso= toNum(d[19]);
     var roas  = toNum(d[20]);
@@ -943,8 +943,9 @@ function renderHist() {
     var pI = maxInv > 0 ? Math.round(inv/maxInv*100) : 0;
     var pL = maxLeads > 0 ? Math.round(leads/maxLeads*100) : 0;
     var roasDisp = roas > 0 ? roas.toFixed(1) + 'x' : (ingreso > 0 && inv > 0 ? (ingreso/inv).toFixed(1) + 'x' : '—');
-    html += '<div class="hic' + (i === 2 ? ' cur' : '') + '">';
-    html += '<div class="hiL">' + label + (i === 2 ? ' ●' : '') + '</div>';
+    var isCurrent = (i === Math.min(histData.length, 5) - 1);
+    html += '<div class="hic' + (isCurrent ? ' cur' : '') + '">';
+    html += '<div class="hiL">' + label + (isCurrent ? ' ●' : '') + '</div>';
     html += '<div style="margin-bottom:8px"><div class="his">INVERSIÓN</div><div class="hiv" style="color:var(--c)">' + ars(inv) + '</div><div class="hib"><div class="hibf" style="width:' + pI + '%;background:var(--c)"></div></div></div>';
     html += '<div style="margin-bottom:8px"><div class="his">LEADS</div><div class="hiv" style="color:var(--g)">' + leads + '</div><div class="hib"><div class="hibf" style="width:' + pL + '%;background:var(--g)"></div></div></div>';
     html += '<div style="display:flex;justify-content:space-between;margin-top:6px">';
